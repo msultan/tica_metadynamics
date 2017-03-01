@@ -1,0 +1,12 @@
+numpy
+mdtraj
+cython
+flake8
+seaborn
+pyyaml
+yaml
+nose
+pandas
+scikit-learn
+pytables
+pyemma

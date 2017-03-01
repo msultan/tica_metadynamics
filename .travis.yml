@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.4"
+
+branches:
+  only:
+    - master
+install:
+  - source devtools/ci/install.sh
+
+script:
+  - nosetests -v
+  #- flake8 `find . -name '*.py'  ! -name build ! -path './build/*' !
+   #         -path './docs*' | xargs`
