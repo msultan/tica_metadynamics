@@ -153,7 +153,7 @@ def render_mean_free_features(df,inds,tica_mdl):
         feat_label = feat+"_%s"%'_'.join(map(str,resids))
 
         output.append(create_mean_free_label(feature_label=feat_label,\
-                                             offset=prj.tica_mdl.means_[feature_index],\
+                                             offset=tica_mdl.means_[feature_index],\
                                              func =func[feature_index], sigma=sigma)+" \\n\\")
         output.append("\n")
 
@@ -177,7 +177,7 @@ def render_tic(df,tica_mdl, tic_index=0):
 
     tic_coefficient = tica_mdl.components_[tic_index,]
     if tica_mdl.kinetic_mapping:
-        tic_coefficient *= prj.tica_mdl.eigenvalues_[tic_index]
+        tic_coefficient *= tica_mdl.eigenvalues_[tic_index]
 
     arg=','.join(feature_labels)
     tic_coefficient = ','.join(map(str,tic_coefficient))
@@ -222,6 +222,13 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
 
 
 def render_metad_bias_print(arg="tic0",stride=1000,label="metad",file="BIAS"):
+    """
+    :param arg: tic name
+    :param stride: stride for printing
+    :param label: label for printing
+    :param file:
+    :return:
+    """
     output=[]
     arg=','.join([arg,label + ".bias"])
     output.append(plumed_print_template.render(arg=arg,
@@ -232,7 +239,7 @@ def render_metad_bias_print(arg="tic0",stride=1000,label="metad",file="BIAS"):
 
 
 def render_tica_plumed_file(tica_mdl, df, grid_list=[None,None],interval_list=[None,None],
-                             pace=1000, biasfactor=50,
+                             pace=1000,  height=1.0, biasfactor=50,
                             temp=300, sigma=0.2, stride=1000, hills_file="HILLS",
                             bias_file="BIAS", label="metad"):
     """
