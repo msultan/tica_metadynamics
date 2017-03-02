@@ -10,3 +10,4 @@ pandas
 scikit-learn
 pytables
 pyemma
+jinja2

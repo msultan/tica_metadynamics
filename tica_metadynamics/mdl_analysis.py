@@ -9,7 +9,6 @@ from pyemma.thermo import mbar
 class MetaProtein(object):
     """
     protein class to load all metadynamics related data for a single protein within a project
-
     """
     def __init__(self, loc, prj,start=0,stop=-1,skip=1, kt=2.5):
         self.loc = os.path.abspath(loc)
