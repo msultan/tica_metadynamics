@@ -241,7 +241,7 @@ def render_metad_bias_print(arg="tic0",stride=1000,label="metad",file="BIAS"):
 def render_tica_plumed_file(tica_mdl, df, grid_list=[None,None],interval_list=[None,None],
                              pace=1000,  height=1.0, biasfactor=50,
                             temp=300, sigma=0.2, stride=1000, hills_file="HILLS",
-                            bias_file="BIAS", label="metad"):
+                            bias_file="BIAS", label="metad",**kwargs):
     """
     Renders a tica plumed dictionary file that can be directly fed in openmm
 
