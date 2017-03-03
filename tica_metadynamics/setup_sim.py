@@ -22,8 +22,8 @@ label: {label}
 """
 
 def setup_tica_meta_sim(sim_loc="./", starting_coordinates_folder="./starting_coordinates",
-                        n_tics=1,tica_mdl=None, data_frame=None, grid=None,
-                        interval=None, pace=1000, stride=1000,
+                        n_tics=1,tica_mdl=None, data_frame=None, grid_list=None,
+                        interval_list=None, pace=1000, stride=1000,
                         temp=300, biasfactor=50, height=1.0,
                         sigma=0.2, delete_existing=False, hills_file="HILLS",
                         bias_file="BIAS", label="metad"):
