@@ -8,8 +8,8 @@ yaml_template = """
 base_dir : {base_dir}
 n_tics: {n_tics}
 starting_coordinates_folder: {starting_coordinates_folder}
-grid: {grid}
-interval: {interval}
+grid_list: {grid_list}
+interval_list: {interval_list}
 pace: {pace}
 stride: {stride}
 temp: {temp}
@@ -25,7 +25,7 @@ def setup_tica_meta_sim(sim_loc="./", starting_coordinates_folder="./starting_co
                         n_tics=1,tica_mdl=None, data_frame=None, grid=None,
                         interval=None, pace=1000, stride=1000,
                         temp=300, biasfactor=50, height=1.0,
-                        sigma=0.2, delete_existing=False,hills_file="HILLS",
+                        sigma=0.2, delete_existing=False, hills_file="HILLS",
                         bias_file="BIAS", label="metad"):
 
     c_dir = os.path.abspath(os.path.curdir)
@@ -50,8 +50,8 @@ def setup_tica_meta_sim(sim_loc="./", starting_coordinates_folder="./starting_co
         yaml_file = yaml.load(yaml_template.format(base_dir=sim_loc,
                                                    n_tics=n_tics,
                                                    starting_coordinates_folder=starting_coordinates_folder,
-                                                   grid=grid,
-                                                   interval=interval,
+                                                   grid_list=grid_list,
+                                                   interval_list=interval_list,
                                                    temp=temp,
                                                    pace=pace,
                                                    height=height,
