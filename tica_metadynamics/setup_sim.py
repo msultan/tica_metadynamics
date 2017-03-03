@@ -40,8 +40,8 @@ def setup_tica_meta_sim(sim_loc="./", starting_coordinates_folder="./starting_co
         except FileExistsError:
             if delete_existing:
                 print("Deleting existing tic %d"%i)
-                shutil.rmtree(sim_loc)
-                os.mkdir(sim_loc)
+                shutil.rmtree("tic_%d"%i)
+                os.mkdir("tic_%d"%i)
             else:
                 print("Folder already exists and cant delete")
                 return #sys.exit()
