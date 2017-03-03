@@ -29,20 +29,7 @@ def setup_tica_meta_sim(sim_loc="./", starting_coordinates_folder="./starting_co
                         bias_file="BIAS", label="metad"):
 
     c_dir = os.path.abspath(os.path.curdir)
-    base_dir = sim_loc
     starting_coordinates_folder = starting_coordinates_folder
-
-    print("Setting up tica simulation folder")
-    try:
-        os.mkdir(sim_loc)
-    except FileExistsError :
-        if delete_existing:
-            print("Deleting existing")
-            shutil.rmtree(sim_loc)
-            os.mkdir(sim_loc)
-        else:
-            print("Folder already exists and cant delete")
-            return #sys.exit()
 
     os.chdir(sim_loc)
     dump(tica_mdl, "tica_mdl.pkl")
@@ -60,7 +47,7 @@ def setup_tica_meta_sim(sim_loc="./", starting_coordinates_folder="./starting_co
                 return #sys.exit()
 
     with open("project.yaml",'w') as yaml_out:
-        yaml_file = yaml.load(yaml_template.format(base_dir=base_dir,
+        yaml_file = yaml.load(yaml_template.format(base_dir=sim_loc,
                                                    n_tics=n_tics,
                                                    starting_coordinates_folder=starting_coordinates_folder,
                                                    grid=grid,
