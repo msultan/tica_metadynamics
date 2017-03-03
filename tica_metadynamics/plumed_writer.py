@@ -191,7 +191,7 @@ def render_tic(df,tica_mdl, tic_index=0):
 
 def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfactor=40,
                       temp=300,interval=None, grid=None,
-                      label="metad",pace=1000):
+                      label="metad",pace=1000,**kwargs):
 
     output=[]
     if interval is None or grid is None:
