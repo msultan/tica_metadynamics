@@ -1,11 +1,7 @@
 #!/bin/evn python
 
-import os
-import mdtraj as mdt
 import os,shutil,sys
-from simtk.openmm.app import *
-from simtk.openmm import *
-from simtk.unit import *
+from msmbuilder.utils import load,dump
 import yaml
 
 yaml_template = """
