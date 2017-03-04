@@ -1,5 +1,6 @@
 #!/bin/env python
 import socket
+from mpi4py import MPI
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()

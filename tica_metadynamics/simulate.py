@@ -27,9 +27,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
     print("Hello from rank %d running tic %d on "
           "host %s with gpu %d"%(rank, rank, my_host_name, my_gpu_index))
 
-    plumed_force_dict = get_plumed_dict(metad_sim)
-
-    #plumed_
+    plumed_force_dict = get_plumed_dict(metad_sim) 
     sim_obj, force_group = create_simulation(metad_sim.base_dir, metad_sim.starting_coordinates,
                                 my_gpu_index, rank, plumed_force_dict[rank],
                                 metad_sim.sim_save_rate)

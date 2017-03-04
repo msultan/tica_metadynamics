@@ -21,12 +21,14 @@ class TicaMetadSim(object):
         self.tica_mdl = tica_mdl
         self.data_frame = data_frame
         self.grid = grid
+        self.interval=interval
+        self.delete_existing = delete_existing
 
-        if grid and grid_list is None:
+        if self.grid and grid_list is None:
             raise ValueError("Grid list is required with grid")
         self.grid_list = grid_list
 
-        if interval and interval_list is None:
+        if self.interval and interval_list is None:
             raise ValueError("interval_list is required with interval")
         self.interval_list = interval_list
 
@@ -55,16 +57,13 @@ class TicaMetadSim(object):
 
     def _setup(self):
         c_dir = os.path.abspath(os.path.curdir)
-        starting_coordinates_folder = starting_coordinates_folder
 
-        os.chdir(sim_loc)
-        dump(tica_mdl, "tica_mdl.pkl")
-        dump(data_frame, "df.pkl")
-        for i in range(n_tics):
+        os.chdir(self.base_dir)
+        for i in range(self.n_tics):
             try:
                 os.mkdir("tic_%d"%i)
             except FileExistsError:
-                if delete_existing:
+                if self.delete_existing:
                     print("Deleting existing tic %d"%i)
                     shutil.rmtree("tic_%d"%i)
                     os.mkdir("tic_%d"%i)
