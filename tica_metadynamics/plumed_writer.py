@@ -30,14 +30,14 @@ plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{fil
 
 def create_torsion_label(inds, label):
     #t: TORSION ATOMS=inds
-    return plumed_torsion_template.render(atoms=','.join(map(str, inds)), label=label) +" \\n\\"
+    return plumed_torsion_template.render(atoms=','.join(map(str, inds)), label=label) +"\n"
 
 def create_distance_label(inds, label):
-    return plumed_dist_template.render(atoms=','.join(map(str, inds)), label=label) + " \\n\\"
+    return plumed_dist_template.render(atoms=','.join(map(str, inds)), label=label) + "\n"
 
 
 def create_rmsd_label(loc, label):
-    return plumed_rmsd_template.render(loc=loc , label=label)+" \\n\\"
+    return plumed_rmsd_template.render(loc=loc , label=label) + "\n"
 
 
 def create_mean_free_label(feature_label, offset, func=None,**kwargs):
@@ -97,7 +97,6 @@ def render_raw_features(df,inds):
                          are supported for now")
     if df.featurizer[0] in ["Contact"] and df.featuregroup[0] not in ["ca"]:
         raise ValueError("Sorry only ca contact are supported for now")
-
     possibles = globals().copy()
     possibles.update(locals())
 
@@ -157,7 +156,7 @@ def render_mean_free_features(df,inds,tica_mdl):
 
         output.append(create_mean_free_label(feature_label=feat_label,\
                                              offset=tica_mdl.means_[feature_index],\
-                                             func =func[feature_index], sigma=sigma)+" \\n\\")
+                                             func =func[feature_index], sigma=sigma)+"\n")
         output.append("\n")
 
     return ''.join(output)
@@ -188,7 +187,7 @@ def render_tic(df,tica_mdl, tic_index=0):
     output.append(plumed_combine_template.render(arg=arg,
                                    coefficients=tic_coefficient,
                                    label="tic%d"%tic_index,
-                                   periodic="NO") +" \\n\\")
+                                   periodic="NO") +"\n")
     return ''.join(output)
 
 
@@ -231,7 +230,8 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
                          grid_min=grid_min,
                          grid_max=grid_max,
                          label=label,
-                         pace=pace)+" \\n\\")
+                         pace=pace,
+                         temp=temp)+"\n")
     return ''.join(output)
 
 
@@ -287,10 +287,10 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         interval_list = np.repeat(None, n_tics)
     for i in range(n_tics):
         output=[]
+        output.append("RESTART\n")
         output.append(raw_feats)
         output.append(mean_feats)
         output.append(render_tic(df,tica_mdl,i))
-        output.append("\n")
         output.append(render_metad_code(arg="tic%d"%i,
                                         sigma=sigma,
                                         height=height,
@@ -301,12 +301,11 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                                         interval=interval_list[i],
                                         grid = grid_list[i],
                                         label=label))
-        output.append("\n")
         output.append(render_metad_bias_print(arg="tic%d"%i,
                                              stride=stride,
                                              label=label,
                                              file=bias_file))
-        return_dict[i] = output
+        return_dict[i] = str(''.join(output))
     return return_dict
 
 
