@@ -20,7 +20,7 @@ def create_simulation(base_dir, starting_dir,
     with open("./plumed_script.dat",'w') as f:
         f.writelines(plumed_script)
     new_f = PlumedForce(str(plumed_script))
-    force_group = 1
+    force_group = 30
     new_f.setForceGroup(force_group)
     system.addForce(new_f)
     platform = Platform.getPlatformByName("CUDA")

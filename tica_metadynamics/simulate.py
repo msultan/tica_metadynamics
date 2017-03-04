@@ -66,7 +66,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
                 sim_obj.context.loadCheckpoint(f.read())
 
             # return new state and new energies
-            new_energy = sim_obj.context.getState(getEnergy=True,groups={1}).\
+            new_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
                 getPotentialEnergy().value_in_unit(kilojoule_per_mole)
             data = comm.gather((new_state,new_energy), root=0)
 
