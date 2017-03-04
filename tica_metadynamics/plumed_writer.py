@@ -1,6 +1,6 @@
 #!/bin/env python
 from jinja2 import Template
-from kinase_msm.data_loader  import load_yaml_file
+from msmbuilder.utils import load
 import numpy as np
 
 plumed_dist_template = Template("DISTANCE ATOMS={{atoms}} LABEL={{label}} ")
@@ -15,10 +15,13 @@ plumed_combine_template = Template("COMBINE LABEL={{label}} ARG={{arg}} COEFFICI
 plumed_plain_metad_template = Template("METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
                                        "FILE={{hills}} TEMP={{temp}} PACE={{pace}} LABEL={{label}}")
 
-plumed_metad_template = Template("METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} FILE={{hills}} "+\
-                                 "BIASFACTOR={{biasfactor}} TEMP={{temp}} "+\
-                                "INTERVAL={{interval}} GRID_MIN={{grid_min}} "+ \
-                                "GRID_MAX={{grid_max}} PACE={{pace}} LABEL={{label}} ")
+
+base_metad_script="METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
+                    "FILE={{hills}} TEMP={{temp}} PACE={{pace}} LABEL={{label}}"
+bias_factor_format = "BIASFACTOR={{biasfactor}}"
+interval_format = "INTERVAL={{interval}}"
+grid_format = "GRID_MIN={{GRID_MIN}} GRID_MAX={{GRID_MAX}}"
+
 
 plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{file}} ")
 
@@ -194,21 +197,32 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
                       label="metad",pace=1000,**kwargs):
 
     output=[]
-    if interval is None or grid is None:
-        plumed_script = plumed_plain_metad_template
-        output.append(plumed_script.render(arg=arg,
-                         sigma=sigma,
-                         height=height,
-                         hills=hills,
-                         temp=temp,
-                         pace=pace)+" \\n\\")
+    base_metad_script="METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
+                    "FILE={{hills}} TEMP={{temp}} PACE={{pace}} LABEL={{label}}"
+    bias_factor_format = "BIASFACTOR={{biasfactor}}"
+    interval_format = "INTERVAL={{interval}}"
+    grid_format = "GRID_MIN={{grid_min}} GRID_MAX={{grid_max}}"
+
+    if biasfactor is not None:
+        base_metad_script = ' '.join((base_metad_script, bias_factor_format))
+    if interval is not None:
+        base_metad_script = ' '.join((base_metad_script, interval_format))
+    if grid is not None:
+        base_metad_script = ' '.join((base_metad_script, grid_format))
+
+    plumed_metad_template = Template(base_metad_script)
+
+    plumed_script = plumed_metad_template
+
+    if grid is None:
+        grid_min=grid_max=0
     else:
-        plumed_script = plumed_metad_template
+        grid_min = grid[0]
+        grid_max = grid[1]
+    if interval is None:
+        interval=[0]
 
-        grid_min=grid[0]
-        grid_max=grid[1]
-
-        output.append(plumed_script.render(arg=arg,
+    output.append(plumed_script.render(arg=arg,
                          sigma=sigma,
                          height=height,
                          hills=hills,
@@ -238,7 +252,7 @@ def render_metad_bias_print(arg="tic0",stride=1000,label="metad",file="BIAS"):
     return ''.join(output)
 
 
-def o(tica_mdl, df, grid_list=[None,None],interval_list=[None,None],
+def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=None,
                              pace=1000,  height=1.0, biasfactor=50,
                             temp=300, sigma=0.2, stride=1000, hills_file="HILLS",
                             bias_file="BIAS", label="metad",**kwargs):
@@ -267,7 +281,11 @@ def o(tica_mdl, df, grid_list=[None,None],interval_list=[None,None],
     raw_feats = render_raw_features(df,inds)
     mean_feats = render_mean_free_features(df,inds,tica_mdl)
 
-    for i in range(tica_mdl.n_components):
+    if grid_list is None:
+        grid_list = np.repeat(None,n_tics)
+    if interval_list is None:
+        interval_list = np.repeat(None, n_tics)
+    for i in range(n_tics):
         output=[]
         output.append(raw_feats)
         output.append(mean_feats)
@@ -290,3 +308,20 @@ def o(tica_mdl, df, grid_list=[None,None],interval_list=[None,None],
                                              file=bias_file))
         return_dict[i] = output
     return return_dict
+
+
+def get_plumed_dict(metad_sim):
+    if  type(metad_sim)==str:
+        metad_sim = load(metad_sim)
+    return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
+                                   df = metad_sim.data_frame,
+                                   n_tics=metad_sim.n_tics,
+                                   grid=metad_sim.grid,
+                                   interval=metad_sim.interval,
+                                   grid_list=metad_sim.grid_list,
+                                   interval_list=metad_sim.interval_list,
+                                    pace=metad_sim.pace,
+                                   height=metad_sim.height, biasfactor=50,
+                                    temp=metad_sim.temp, sigma=metad_sim.sigma,
+                                   stride=metad_sim.stride, hills_file=metad_sim.hills_file,
+                                    bias_file=metad_sim.bias_file, label=metad_sim.label)

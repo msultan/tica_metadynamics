@@ -7,7 +7,7 @@ from .utils import get_gpu_index
 import socket
 import numpy as np
 from simtk.unit import *
-
+from .plumed_writer import get_plumed_dict
 import os
 boltzmann_constant = 0.0083144621
 
