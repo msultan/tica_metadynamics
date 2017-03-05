@@ -20,7 +20,7 @@ def test_setup():
                      data_frame=df, grid=False, interval=False,
                      platform='CPU',n_iterations=1,
                      swap_rate=5,sim_save_rate=10,pace=1,
-                     stride=1,grid=False,interval=False)
+                     stride=1)
 
         assert run_meta_sim("./metad_sim.pkl")
 
