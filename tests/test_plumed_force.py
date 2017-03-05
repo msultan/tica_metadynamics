@@ -23,10 +23,11 @@ def test_plumed_run():
                      stride=1)
         meta_sim = load("./metad_sim.pkl")
         run_meta_sim("./metad_sim.pkl")
-        for i in range(tica_mdl.n_components):
+        for i in range(1):
             for j in [meta_sim.bias_file, meta_sim.hills_file,\
                       "speed_report.txt","trajectory.dcd","plumed_script.dat",\
                       "checkpt.chk"]:
-                assert os.path.isfile("./tic_%d/%s"%(i,j))
-        assert os.path.isfile("swap_log.txt")
+                print(i,j)
+                assert os.path.isfile(os.path.join(cur_dir,"tic_%d"%i,j))
+        assert not os.path.isfile("swap_log.txt")
     
