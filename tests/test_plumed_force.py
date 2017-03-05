@@ -9,7 +9,7 @@ if os.path.isdir("tests"):
 else:
     base_dir = os.path.abspath(os.path.join("./test_data"))
 
-def test_setup():
+def test_plumed_run():
     tica_mdl = load(os.path.join(base_dir,"dihedral_mdl/tica_mdl.pkl"))
     df = load(os.path.join(base_dir,"./dihedral_mdl/feature_descriptor.pkl"))
     starting_coordinates_folder = os.path.join(base_dir,"starting_coordinates")
@@ -21,6 +21,12 @@ def test_setup():
                      platform='CPU',n_iterations=1,
                      swap_rate=5,sim_save_rate=10,pace=1,
                      stride=1)
-
-        assert run_meta_sim("./metad_sim.pkl")
-
+        meta_sim = load("./metad_sim.pkl")
+        run_meta_sim("./metad_sim.pkl")
+        for i in range(tica_mdl.n_components):
+            for j in [meta_sim.bias_file, meta_sim.hills_file,\
+                      "speed_report.txt","trajectory.dcd","plumed_script.dat",\
+                      "checkpt.chk"]:
+                assert os.path.isfile("./tic_%d/%s"%(i,j))
+        assert os.path.isfile("swap_log.txt")
+    
