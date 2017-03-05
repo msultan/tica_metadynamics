@@ -13,7 +13,8 @@ class TicaMetadSim(object):
                             sigma=0.2, delete_existing=False, hills_file="HILLS",
                             bias_file="BIAS", label="metad",
                             sim_save_rate=50000,
-                            swap_rate=3000, n_iterations=1000):
+                            swap_rate=3000, n_iterations=1000,
+                            platform='CUDA'):
         self.base_dir = base_dir
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -23,6 +24,7 @@ class TicaMetadSim(object):
         self.interval=interval
         self.delete_existing = delete_existing
         self.n_iterations = n_iterations
+        self.platform = platform
 
         if self.grid and grid_list is None:
             raise ValueError("Grid list is required with grid")

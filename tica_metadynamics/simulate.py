@@ -30,7 +30,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
     plumed_force_dict = get_plumed_dict(metad_sim) 
     sim_obj, force_group = create_simulation(metad_sim.base_dir, metad_sim.starting_coordinates_folder,
                                 my_gpu_index, rank, plumed_force_dict[rank],
-                                metad_sim.sim_save_rate)
+                                metad_sim.sim_save_rate, metad_sim.platform)
     if rank ==0 and size>1:
         log_file = open("../swap_log.txt","a")
         header = ["Iteration","S_i","S_j","Eii","Ejj","Eij","Eji","DeltaE","Temp","Beta","Probability","Accepted"]

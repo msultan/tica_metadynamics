@@ -11,3 +11,4 @@ scikit-learn
 pytables
 pyemma
 jinja2
+mpi4py

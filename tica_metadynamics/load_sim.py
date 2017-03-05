@@ -8,7 +8,8 @@ from openmmplumed import PlumedForce
 def create_simulation(base_dir, starting_dir,
                       gpu_index,tic_index,
                       plumed_script,
-                      sim_save_rate):
+                      sim_save_rate,
+                      platform):
     print("Creating simulation for tic %d"%tic_index)
     os.chdir((os.path.join(base_dir,"tic_%d"%tic_index)))
 
@@ -23,8 +24,12 @@ def create_simulation(base_dir, starting_dir,
     force_group = 30
     new_f.setForceGroup(force_group)
     system.addForce(new_f)
-    platform = Platform.getPlatformByName("CUDA")
-    properties = {'CudaPrecision': 'mixed', 'CudaDeviceIndex': str(gpu_index)}
+    if platform=='CPU':
+        platform = Platform.getPlatformByName("CPU")
+        properties =dict()
+    else:
+        platform = Platform.getPlatformByName("CUDA")
+        properties = {'CudaPrecision': 'mixed', 'CudaDeviceIndex': str(gpu_index)}
     simulation = app.Simulation(pdb.topology, system, integrator, platform, properties)
     if os.path.isfile("./checkpt.chk"):
         with open("checkpt.chk",'rb') as f:
