@@ -5,10 +5,12 @@ if [[ $MINICONDA_MD5 != $(md5sum $MINICONDA | cut -d ' ' -f 1) ]]; then  echo "M
 bash $MINICONDA -b
 export PATH=$HOME/miniconda3/bin:$PATH
 conda config --add channels omnia
+conda config --add channels acellera
 #conda update conda
 conda info -a
 conda create --yes -n _test python=$TRAVIS_PYTHON_VERSION `cat requirements.txt | xargs`
 source activate _test
-pip install fastcluster
+conda install -yq plumed2=2.3.0
+conda install -yq openmm
 pip install git+https://github.com/msmbuilder/msmbuilder.git
 python setup.py install

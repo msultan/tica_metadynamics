@@ -100,25 +100,24 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
 
     if rank==0 and size >1: 
         log_file.close()
+
     return
 
 
 
 
-    def parse_commandline():
-
-        parser = argparse.ArgumentParser()
-        parser.add_argument('-f','--file', dest='f',
+def parse_commandline():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f','--file', dest='f',
                             default='./metad_sim.pkl',
               help='TICA METAD location file')
+    return args
 
-        return args
+def main():
+    args = parse_commandline()
+    file_loc = args.f
+    run_meta_sim(file_loc)
+    return
 
-    def main():
-        args = parse_commandline()
-        file_loc = args.f
-        run_meta_sim(file_loc)
-        return
-
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
