@@ -1,14 +1,19 @@
 #!/bin/env python
-import os
+import os,sys
 from msmbuilder.utils import load
 from tica_metadynamics.setup_sim import TicaMetadSim
 from mdtraj.utils import enter_temp_directory
+from numpy.testing.decorators import skipif
 from tica_metadynamics.simulate import run_meta_sim
+try: 
+    from openmmplumed import PlumedForce
+except:
+    pass
 if os.path.isdir("tests"):
     base_dir = os.path.abspath(os.path.join("./tests/test_data"))
 else:
     base_dir = os.path.abspath(os.path.join("./test_data"))
-
+@skipif('openmmplumed' not in sys.modules, 'Need openmmplumed force for this')
 def test_plumed_run():
     tica_mdl = load(os.path.join(base_dir,"dihedral_mdl/tica_mdl.pkl"))
     df = load(os.path.join(base_dir,"./dihedral_mdl/feature_descriptor.pkl"))
