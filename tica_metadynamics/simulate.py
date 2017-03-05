@@ -76,7 +76,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
                 delta_e = e_i_i+e_j_j - e_i_j - e_j_i
                 probability = np.min((1,np.exp(beta*delta_e)))
                 print(e_i_i,e_j_j,e_i_j,e_j_i,probability)
-                if np.random.rand() < probability :
+                if np.random.random() < probability :
                     accepted= 1
                     print("Swapping out %d with %d"%(i,j),flush=True)
                 else:
