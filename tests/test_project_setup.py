@@ -15,14 +15,15 @@ def test_setup():
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,
-                     data_frame=df, grid=False, interval=False)
+                     data_frame=df, grid=False, interval=False,wall=False,
+                     render_scripts=True)
 
         metad_sim = load("./metad_sim.pkl")
 
         assert eq(tica_mdl.components_, metad_sim.tica_mdl.components_)
         for i in range(metad_sim.n_tics):
             assert os.path.isdir("tic_%d"%i)
-
+            assert os.path.isfile(("tic_%d/plumed.dat"%i))
         assert os.path.isfile("sub.sh")
 
 def test_delete():
@@ -31,7 +32,7 @@ def test_delete():
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,
-                     data_frame=df, grid=False, interval=False)
+                     data_frame=df, grid=False, interval=False,render_scripts=True)
 
 
         f = open("tic_0/rand.txt",'w')

@@ -3,36 +3,65 @@
 import os,shutil,sys
 from msmbuilder.utils import load,dump
 from .render_sub_file import slurm_temp
-
+from .plumed_writer import get_interval, get_plumed_dict
 class TicaMetadSim(object):
     def __init__(self, base_dir="./", starting_coordinates_folder="./starting_coordinates",
-                            n_tics=1,tica_mdl=None, data_frame=None, grid=True,
-                            grid_list=None, interval=True,
-                            interval_list=None, pace=1000, stride=1000,
+                            n_tics=1,tica_mdl=None, tica_data=None,data_frame=None, grid=False,
+                            interval=False,wall=False,
+                            pace=1000, stride=1000,
                             temp=300, biasfactor=50, height=1.0,
                             sigma=0.2, delete_existing=False, hills_file="HILLS",
                             bias_file="BIAS", label="metad",
                             sim_save_rate=50000,
                             swap_rate=3000, n_iterations=1000,
-                            platform='CUDA'):
+                            platform='CUDA',
+                            grid_mlpt_factor=.3,
+                            render_scripts=False):
         self.base_dir = base_dir
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
         self.tica_mdl = tica_mdl
+        self.tica_data = tica_data
         self.data_frame = data_frame
         self.grid = grid
+        self.grid_mlpt_factor = grid_mlpt_factor
         self.interval=interval
+        self.wall = wall
         self.delete_existing = delete_existing
         self.n_iterations = n_iterations
         self.platform = platform
+        self.grid_list  = self.interval_list = self.wall_list = None
+        self.render_scripts = render_scripts
 
-        if self.grid and grid_list is None:
-            raise ValueError("Grid list is required with grid")
-        self.grid_list = grid_list
+        if self.grid:
+            if len(self.grid) < 2:
+                raise ValueError("grid must length at least 2 (like (0,100)")
+            if len(self.grid)==2 and type(self.grid[0]) in [float,int]:
+                # assume user meant us to specify
+                self.grid_list = get_interval(self.tica_data, self.grid[0], self.grid[1])
+                #add extra mulplicative factor because these these tend to fail
+                self.grid_list = [(i-self.grid_mlpt_factor*i,\
+                                   j+self.grid_mlpt_factor*j) for k in self.grid for i,j in k]
+            else:
+                self.grid_list = self.grid
 
-        if self.interval and interval_list is None:
-            raise ValueError("interval_list is required with interval")
-        self.interval_list = interval_list
+        if self.interval:
+            if len(self.interval) < 2:
+                raise ValueError("interval must length 2(like (0,100) for "
+                                 "calculating percentiles")
+            if len(self.interval)==2 and type(self.interval[0]) in [float,int]:
+               self.interval_list = get_interval(self.tica_data,self.interval[0],self.interval[1])
+            else:
+                self.interval_list = self.interval
+
+        if self.wall:
+            if len(self.wall) < 2:
+                raise ValueError("interval must length 2(like (0,100) for "
+                                 "calculating percentiles")
+            if len(self.wall)==2 and type(self.wall[0]) in [float,int]:
+               self.wall_list = get_interval(self.tica_data,self.wall[0],self.wall[1])
+            else:
+                self.wall_list = self.wall
 
         self.pace = pace
         self.stride = stride
@@ -56,6 +85,13 @@ class TicaMetadSim(object):
                           base_dir=self.base_dir,
                           partition="pande",
                           n_tics=self.n_tics))
+
+        if self.render_scripts:
+            res_dict = get_plumed_dict(self)
+            for i in range(self.n_tics):
+                with open("%s/tic_%d/plumed.dat"%(self.base_dir,i),'w') as f:
+                    f.writelines(res_dict[i])
+
 
     def _setup(self):
         c_dir = os.path.abspath(os.path.curdir)

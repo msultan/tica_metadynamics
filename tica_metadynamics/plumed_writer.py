@@ -22,6 +22,8 @@ bias_factor_format = "BIASFACTOR={{biasfactor}}"
 interval_format = "INTERVAL={{interval}}"
 grid_format = "GRID_MIN={{GRID_MIN}} GRID_MAX={{GRID_MAX}}"
 
+plumed_wall_template = Template("{{wall_type}}_WALLS ARG={{arg}} AT={{at}} "
+                         "KAPPA={{kappa}} EXP={{exp}} EPS={{eps}} OFFSET={{offset}} LABEL={{label}}")
 
 plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{file}} ")
 
@@ -82,12 +84,12 @@ class PlumedWriter(object):
     def render_plumed(self):
         return write_plumed_file(self.tica_mdl, self.df)
 
-def get_interval(prj,lower,upper):
-    if type(prj.tica_data)==dict:
-        return np.percentile(np.concatenate([prj.tica_data[i] for \
-                                             i in prj.tica_data.keys()]),(lower, upper), axis=0)
+def get_interval(tica_data,lower,upper):
+    if type(tica_data)==dict:
+        return np.percentile(np.concatenate([tica_data[i] for \
+                                             i in tica_data.keys()]),(lower, upper), axis=0)
     else:
-        return np.percentile(np.concatenate([i for i in prj.tica_data]),(lower, upper), axis=0)
+        return np.percentile(np.concatenate([i for i in tica_data]),(lower, upper), axis=0)
 
 
 def render_raw_features(df,inds):
@@ -111,7 +113,7 @@ def render_raw_features(df,inds):
 
     for j in df.iloc[inds].iterrows():
         feature_index = j[0]
-        atominds = j[1]["atominds"]
+        atominds = np.array(j[1]["atominds"])
         resids = j[1]["resids"]
         feat = j[1]["featuregroup"]
         feat_label = feat+"_%s"%'_'.join(map(str,resids))
@@ -251,8 +253,30 @@ def render_metad_bias_print(arg="tic0",stride=1000,label="metad",file="BIAS"):
 
     return ''.join(output)
 
+def render_tic_wall(arg,wall_limts):
+    """
+    :param arg: tic name
+    :param stride: stride for printing
+    :param label: label for printing
+    :param file:
+    :return:
+    """
+    output=[]
+    for i,wall_type in enumerate(["UPPER","LOWER"]):
+        output.append(plumed_wall_template.render(wall_type=wall_type,
+                                                  arg=arg,
+                                                  at=wall_limts[i],
+                                                  kappa=150,
+                                                  exp=2,
+                                                  eps=1,
+                                                  offset=0,
+                                                  label=wall_type))
+        if i==0:
+            output.append("\n")
+    return ''.join(output)
 
 def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=None,
+                            wall_list=None,
                              pace=1000,  height=1.0, biasfactor=50,
                             temp=300, sigma=0.2, stride=1000, hills_file="HILLS",
                             bias_file="BIAS", label="metad",**kwargs):
@@ -291,6 +315,10 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         output.append(raw_feats)
         output.append(mean_feats)
         output.append(render_tic(df,tica_mdl,i))
+        if wall_list is not None:
+            output.append(render_tic_wall(arg="tic%d"%i,
+                                          wall_limts=wall_list[i],
+                                          **kwargs))
         output.append(render_metad_code(arg="tic%d"%i,
                                         sigma=sigma,
                                         height=height,
@@ -317,6 +345,7 @@ def get_plumed_dict(metad_sim):
                                    n_tics=metad_sim.n_tics,
                                    grid=metad_sim.grid,
                                    interval=metad_sim.interval,
+                                    wall_list=metad_sim.wall_list,
                                    grid_list=metad_sim.grid_list,
                                    interval_list=metad_sim.interval_list,
                                     pace=metad_sim.pace,
