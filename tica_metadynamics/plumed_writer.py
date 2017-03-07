@@ -122,7 +122,10 @@ def render_raw_features(df,inds):
             feat_label = feat+"_%s"%'_'.join(map(str,resids))
         if feat_label not in already_done_list:
             #mdtraj is 0 indexed and plumed is 1 indexed
-            output.append(func(atominds + 1 , feat_label))
+            if  df.featurizer[0] == "LandMarkFeaturizer":
+                output.append(func("../pdbs/%d.pdb"%feature_index , feat_label))
+            else:
+                output.append(func(atominds + 1 , feat_label))
             output.append("\n")
             already_done_list.append(feat_label)
 
@@ -180,7 +183,10 @@ def render_tic(df,tica_mdl, tic_index=0):
     else:
         func = df.otherinfo[inds]
 
-    feat_labels=['_'.join(map(str,i)) for i in df.resids[inds]]
+    if  df.featurizer[0] == "LandMarkFeaturizer":
+        feat_labels =  ['_'.join(map(str,i)) for i in range(len(df))]
+    else:
+        feat_labels=['_'.join(map(str,i)) for i in df.resids[inds]]
     feature_labels = [template.render(func=i,feature_group=j,feature_index=k) \
                       for i,j,k in zip(func[inds],df.featuregroup[inds],feat_labels)]
 
