@@ -39,9 +39,11 @@ class TicaMetadSim(object):
             if len(self.grid)==2 and type(self.grid[0]) in [float,int]:
                 # assume user meant us to specify
                 self.grid_list = get_interval(self.tica_data, self.grid[0], self.grid[1])
+                print(self.grid_list)
                 #add extra mulplicative factor because these these tend to fail
-                self.grid_list = [(i-self.grid_mlpt_factor*i,\
-                                   j+self.grid_mlpt_factor*j) for k in self.grid for i,j in k]
+                self.grid_list = [(k[0]-self.grid_mlpt_factor*abs(k[0]),\
+                                   k[1]+self.grid_mlpt_factor*abs(k[1])) for k in self.grid_list]
+                print(self.grid_list)
             else:
                 self.grid_list = self.grid
 
@@ -74,7 +76,7 @@ class TicaMetadSim(object):
         self.label = label
         self.sim_save_rate = sim_save_rate
         self.swap_rate = swap_rate
-
+        self.plumed_scripts_dict = None
 
         self._setup()
         print("Dumping model into %s and writing "
@@ -87,11 +89,12 @@ class TicaMetadSim(object):
                           n_tics=self.n_tics))
 
         if self.render_scripts:
-            res_dict = get_plumed_dict(self)
+            self.plumed_scripts_dict = get_plumed_dict(self)
             for i in range(self.n_tics):
                 with open("%s/tic_%d/plumed.dat"%(self.base_dir,i),'w') as f:
-                    f.writelines(res_dict[i])
+                    f.writelines(self.plumed_scripts_dict[i])
 
+        dump(self,"%s/metad_sim.pkl"%self.base_dir)
 
     def _setup(self):
         c_dir = os.path.abspath(os.path.curdir)
@@ -108,6 +111,5 @@ class TicaMetadSim(object):
                 else:
                     print("Folder already exists and cant delete")
                     return #sys.exit()
-        dump(self,"metad_sim.pkl")
         os.chdir(c_dir)
         return

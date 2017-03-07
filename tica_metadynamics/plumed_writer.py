@@ -86,11 +86,11 @@ class PlumedWriter(object):
 
 def get_interval(tica_data,lower,upper):
     if type(tica_data)==dict:
-        return np.percentile(np.concatenate([tica_data[i] for \
+        res = np.percentile(np.concatenate([tica_data[i] for \
                                              i in tica_data.keys()]),(lower, upper), axis=0)
     else:
-        return np.percentile(np.concatenate([i for i in tica_data]),(lower, upper), axis=0)
-
+        res = np.percentile(np.concatenate([i for i in tica_data]),(lower, upper), axis=0)
+    return [i for i in zip(res[0],res[1])]
 
 def render_raw_features(df,inds):
     output = []
@@ -253,7 +253,7 @@ def render_metad_bias_print(arg="tic0",stride=1000,label="metad",file="BIAS"):
 
     return ''.join(output)
 
-def render_tic_wall(arg,wall_limts):
+def render_tic_wall(arg,wall_limts,**kwargs):
     """
     :param arg: tic name
     :param stride: stride for printing
@@ -262,7 +262,7 @@ def render_tic_wall(arg,wall_limts):
     :return:
     """
     output=[]
-    for i,wall_type in enumerate(["UPPER","LOWER"]):
+    for i,wall_type in enumerate(["LOWER","UPPER"]):
         output.append(plumed_wall_template.render(wall_type=wall_type,
                                                   arg=arg,
                                                   at=wall_limts[i],
@@ -270,9 +270,8 @@ def render_tic_wall(arg,wall_limts):
                                                   exp=2,
                                                   eps=1,
                                                   offset=0,
-                                                  label=wall_type))
-        if i==0:
-            output.append("\n")
+                                                  label=wall_type.lower()))
+        output.append("\n")
     return ''.join(output)
 
 def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=None,
