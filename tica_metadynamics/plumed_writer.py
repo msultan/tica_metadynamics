@@ -184,9 +184,9 @@ def render_tic(df,tica_mdl, tic_index=0):
         func = df.otherinfo[inds]
 
     if  df.featurizer[0] == "LandMarkFeaturizer":
-        feat_labels =  ['_'.join(map(str,i)) for i in range(len(df))]
+        feat_labels =  ["../pdbs/%d.pdb"%i for i in range(len(df))]
     else:
-        feat_labels=['_'.join(map(str,i)) for i in df.resids[inds]]
+        feat_labels = ['_'.join(map(str,i)) for i in df.resids[inds]]
     feature_labels = [template.render(func=i,feature_group=j,feature_index=k) \
                       for i,j,k in zip(func[inds],df.featuregroup[inds],feat_labels)]
 
