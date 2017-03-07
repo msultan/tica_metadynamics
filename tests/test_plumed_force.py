@@ -7,7 +7,7 @@ from numpy.testing.decorators import skipif
 from tica_metadynamics.simulate import run_meta_sim
 try: 
     import openmmplumed
-except ImportError:
+except:
     pass
 if os.path.isdir("tests"):
     base_dir = os.path.abspath(os.path.join("./tests/test_data"))

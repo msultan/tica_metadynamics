@@ -348,7 +348,7 @@ def get_plumed_dict(metad_sim):
                                    grid_list=metad_sim.grid_list,
                                    interval_list=metad_sim.interval_list,
                                     pace=metad_sim.pace,
-                                   height=metad_sim.height, biasfactor=50,
+                                   height=metad_sim.height, biasfactor=metad_sim.biasfactor,
                                     temp=metad_sim.temp, sigma=metad_sim.sigma,
                                    stride=metad_sim.stride, hills_file=metad_sim.hills_file,
                                     bias_file=metad_sim.bias_file, label=metad_sim.label)
