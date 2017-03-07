@@ -47,7 +47,7 @@ def create_mean_free_label(feature_label, offset, func=None,**kwargs):
     if func is None:
         f = "x-%s"%offset
     elif func=="exp":
-        f = "%s(-(x)^2/(2*%s^2)) - %s"%(func,kwargs.pop("sigma"),offset)
+        f = "%s(-(x)^2/(2*%s^2))-%s"%(func,kwargs.pop("sigma"),offset)
     elif func in ["sin","cos"]:
         f = "%s(x)-%s"%(func, offset)
     else:
