@@ -22,7 +22,7 @@ def _test_plumed_run():
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir,starting_coordinates_folder=starting_coordinates_folder,
-                     tica_mdl=tica_mdl,
+                      tica_mdl=tica_mdl,
                      data_frame=df, grid=False, interval=False,wall=False,
                      platform='CPU',n_iterations=1,
                      swap_rate=5,sim_save_rate=10,pace=1,

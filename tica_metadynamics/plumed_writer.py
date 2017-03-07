@@ -116,7 +116,10 @@ def render_raw_features(df,inds):
         atominds = np.array(j[1]["atominds"])
         resids = j[1]["resids"]
         feat = j[1]["featuregroup"]
-        feat_label = feat+"_%s"%'_'.join(map(str,resids))
+        if  df.featurizer[0] == "LandMarkFeaturizer":
+            feat_label =  feat+"_%s"%feature_index
+        else:
+            feat_label = feat+"_%s"%'_'.join(map(str,resids))
         if feat_label not in already_done_list:
             #mdtraj is 0 indexed and plumed is 1 indexed
             output.append(func(atominds + 1 , feat_label))
@@ -153,8 +156,10 @@ def render_mean_free_features(df,inds,tica_mdl):
         feat = j[1]["featuregroup"]
         resids = j[1]["resids"]
         feat = j[1]["featuregroup"]
-
-        feat_label = feat+"_%s"%'_'.join(map(str,resids))
+        if  df.featurizer[0] == "LandMarkFeaturizer":
+            feat_label =  feat+"_%s"%feature_index
+        else:
+            feat_label = feat+"_%s"%'_'.join(map(str,resids))
 
         output.append(create_mean_free_label(feature_label=feat_label,\
                                              offset=tica_mdl.means_[feature_index],\
