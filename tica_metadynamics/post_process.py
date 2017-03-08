@@ -62,6 +62,7 @@ def parse_commandline():
     parser.add_argument('-r','--redo', dest='r',
                             default=True,
               help='Redo trajectory concatenation')
+    args = parser.parse_args()
     return args
 
 

@@ -16,7 +16,9 @@ setup(
     author_email="msultan at stanford dot edu",
     description=("Useful scripts for running and analysing tica_metad"),
     long_description=read('README.md'),
-    #entry_points = {
-     #   'console_scripts': ['tica_vmd=kinase_msm.vmd_write:main'],
-    #}
+    entry_points = {
+       'console_scripts': ['setup_tica_meta_sim=tica_metadynamics.setup_file:main',
+                           'run_tica_meta_sim=tica_metadynamics.simulate:main'],
+
+    }
 )

@@ -4,6 +4,7 @@ from mpi4py import MPI
 import mdtraj as md
 import glob
 from msmbuilder.dataset import _keynat as keynat
+import yaml
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
@@ -54,3 +55,10 @@ def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb"):
     print("Found %d trajs"%len(trj_list))
 
     return
+
+
+def load_yaml_file(yaml_file):
+    if isinstance(yaml_file, dict):
+        return yaml_file
+    else:
+        return yaml.load(open(yaml_file, 'r'))

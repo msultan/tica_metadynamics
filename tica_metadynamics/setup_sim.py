@@ -1,12 +1,14 @@
 #!/bin/evn python
 
-import os,shutil,sys
+import os,shutil
+from .utils import load_yaml_file
 from msmbuilder.utils import load,dump
 from .render_sub_file import slurm_temp
 from .plumed_writer import get_interval, get_plumed_dict
 class TicaMetadSim(object):
     def __init__(self, base_dir="./", starting_coordinates_folder="./starting_coordinates",
-                            n_tics=1,tica_mdl=None, tica_data=None,data_frame=None, grid=False,
+                            n_tics=1,tica_mdl="tica_mdl.pkl", tica_data="tica_data.pkl",
+                            data_frame="feature_descriptor.pkl", grid=False,
                             interval=False,wall=False,
                             pace=1000, stride=1000,
                             temp=300, biasfactor=50, height=1.0,
@@ -17,12 +19,23 @@ class TicaMetadSim(object):
                             platform='CUDA',
                             grid_mlpt_factor=.3,
                             render_scripts=False):
-        self.base_dir = base_dir
+        self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
-        self.tica_mdl = tica_mdl
-        self.tica_data = tica_data
-        self.data_frame = data_frame
+        if type(tica_mdl)==str:
+            self.tica_mdl = load(tica_mdl)
+        else:
+            self.tica_mdl = tica_mdl
+
+        if type(tica_data)==str:
+            self.tica_data = load(tica_data)
+        else:
+            self.tica_data = tica_data
+
+        if type(data_frame)==str:
+            self.data_frame = load(data_frame)
+        else:
+            self.data_frame = data_frame
         self.grid = grid
         self.grid_mlpt_factor = grid_mlpt_factor
         self.interval=interval
@@ -35,7 +48,7 @@ class TicaMetadSim(object):
 
         if self.grid:
             if len(self.grid) < 2:
-                raise ValueError("grid must length at least 2 (like (0,100)")
+                raise ValueError("grid must length at least 2 (like [0, 100]")
             if len(self.grid)==2 and type(self.grid[0]) in [float,int]:
                 # assume user meant us to specify
                 self.grid_list = get_interval(self.tica_data, self.grid[0], self.grid[1])
@@ -49,7 +62,7 @@ class TicaMetadSim(object):
 
         if self.interval:
             if len(self.interval) < 2:
-                raise ValueError("interval must length 2(like (0,100) for "
+                raise ValueError("interval must length 2(like [0, 100] for "
                                  "calculating percentiles")
             if len(self.interval)==2 and type(self.interval[0]) in [float,int]:
                self.interval_list = get_interval(self.tica_data,self.interval[0],self.interval[1])
@@ -58,7 +71,7 @@ class TicaMetadSim(object):
 
         if self.wall:
             if len(self.wall) < 2:
-                raise ValueError("interval must length 2(like (0,100) for "
+                raise ValueError("interval must length 2(like [0, 100] for "
                                  "calculating percentiles")
             if len(self.wall)==2 and type(self.wall[0]) in [float,int]:
                self.wall_list = get_interval(self.tica_data,self.wall[0],self.wall[1])
@@ -80,9 +93,9 @@ class TicaMetadSim(object):
 
         self._setup()
         print("Dumping model into %s and writing "
-              "submission scripts"%base_dir)
+              "submission scripts"%self.base_dir)
 
-        with open(os.path.join(base_dir,"sub.sh"),'w') as f:
+        with open(os.path.join(self.base_dir,"sub.sh"),'w') as f:
             f.writelines(slurm_temp.render(job_name="tica_metad",
                           base_dir=self.base_dir,
                           partition="pande",
@@ -113,3 +126,23 @@ class TicaMetadSim(object):
                     return #sys.exit()
         os.chdir(c_dir)
         return
+
+
+
+def parse_commandline():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f','--yaml_file', dest='f',
+                            default='./sim_params.pkl',
+              help='sim_params location file')
+    return args
+
+def main():
+    args = parse_commandline()
+    yaml_file = load_yaml_file(args.f)
+    TicaMetadSim(**load_yaml_file(yaml_file))
+    return
+
+if __name__ == "__main__":
+    main()
+
+

@@ -2,7 +2,6 @@
 from mpi4py import MPI
 import argparse
 from msmbuilder.utils import load
-from .load_sim import create_simulation
 from .utils import get_gpu_index
 import socket
 import numpy as np
@@ -17,6 +16,8 @@ rank = comm.Get_rank()
 
 
 def run_meta_sim(file_loc="metad_sim.pkl"):
+    from tica_metadynamics.load_sim import create_simulation
+
     metad_sim = load(file_loc)
     #beta is 1/kt
     beta = 1/(boltzmann_constant * metad_sim.temp)
@@ -111,6 +112,7 @@ def parse_commandline():
     parser.add_argument('-f','--file', dest='f',
                             default='./metad_sim.pkl',
               help='TICA METAD location file')
+    args = parser.parse_args()
     return args
 
 def main():
