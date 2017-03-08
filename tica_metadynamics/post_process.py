@@ -33,7 +33,7 @@ def process_all_replicas(file_loc,redo=True):
     tic_folder_list = sorted(glob.glob("tic*"),key=keynat)
     n_tics = len(tic_folder_list)
     print(tic_folder_list,n_tics)
-    top_loc = glob.glob(os.path.join(starting_coordinates_folder,"*.pdb"))[0]
+    top_loc = glob.glob(os.path.join(sim_mdl.starting_coordinates_folder,"0.pdb"))[0]
     for i in range(n_tics):
         if redo:
             concatenate_folder("tic_%d"%i, top_loc)
