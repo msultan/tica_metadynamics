@@ -2,6 +2,7 @@
 import socket
 from mpi4py import MPI
 import mdtraj as md
+import glob
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
@@ -42,7 +43,7 @@ def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb"):
     trj_list=[]
     for i in flist:
         try:
-            trj_list.append(md.load_dcd(i,top=top))
+            trj_list.append(md.load(i,top=top))
         except:
             pass
 
