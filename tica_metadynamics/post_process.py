@@ -46,7 +46,7 @@ def main():
     process_all_replicas(file_loc,redo)
     return
 
-def process_all_replicas(file_loc,redo=True):    
+def process_all_replicas(file_loc,redo=True):
     sim_mdl = load(file_loc)
     os.chdir(sim_mdl.base_dir)
     tic_folder_list = sorted(glob.glob("tic*"),key=keynat)
