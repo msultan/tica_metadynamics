@@ -1,7 +1,7 @@
 #!/bin/env python
 from msmbuilder.utils import load,dump
-import os,glob
-from msmbuilder.dataset import _keynat as keynat
+import os,glob,shutil
+from mdtraj.utils import enter_temp_directory
 from subprocess import call
 from multiprocessing import Pool
 from .utils import concatenate_folder
@@ -13,26 +13,22 @@ def process_folder(job_tuple):
     print(fname)
     base_dir = os.getcwd()
     os.chdir(os.path.join(base_dir,fname))
-    try:
-        os.remove("r%dt%d.bias"%(tic_index,i))
-    except:
-        pass
-    f = open("./plumed.dat",'w')
-    f.writelines(script)
-    f.close()
-    cmd = ["plumed","--no-mpi", "driver", "--mf_xtc", "../tic_%s/tic_%s.xtc"%(r2,r2)]
-    ret_code = call(cmd)
-
-    print(ret_code)
+    traj_file_loc = os.path.abspath("tic_%s/tic_%s.xtc"%(r2,r2))
+    bias_file_loc = os.path.abspath("tic_%s/%s_%s.bias"%(r1,r1,r2))
+    with enter_temp_directory():
+        f = open("./plumed.dat",'w')
+        f.writelines(script)
+        f.close()
+        cmd = ["plumed","--no-mpi", "driver", "--mf_xtc", traj_file_loc]
+        ret_code = call(cmd)
+        shutil.copy("%s_%s.bias"%(r1,r2),bias_file_loc)
+        print(ret_code)
     os.chdir(base_dir)
     return
 
 def process_all_replicas(file_loc,redo=True):
     sim_mdl = load(file_loc)
     os.chdir(sim_mdl.base_dir)
-    tic_folder_list = sorted(glob.glob("tic*"),key=keynat)
-    n_tics = len(tic_folder_list)
-    print(tic_folder_list,n_tics)
     top_loc = glob.glob(os.path.join(sim_mdl.starting_coordinates_folder,"0.pdb"))[0]
     for i in range(sim_mdl.n_tics):
         if redo:
