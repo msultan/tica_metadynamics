@@ -47,7 +47,7 @@ def process_all_replicas(file_loc,redo=True):
         for r2 in range(sim_mdl.n_tics):
             full_dict["%d_%d"%(r1,r2)] = Template(plumed_scripts_dict[r1]).render(fname="r%d_t%d.bias"%(r1,r2))
 
-    p = Pool(n_tics)
+    p = Pool(sim_mdl.n_tics)
     jobs =[(r1, r2, full_dict["%d_%d"%(r1,r2)]) for r1 in range(sim_mdl.n_tics)
            for r2 in range(sim_mdl.n_tics)]
     p.map(process_folder,jobs)
