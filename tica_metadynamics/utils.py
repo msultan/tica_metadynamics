@@ -3,6 +3,7 @@ import socket
 from mpi4py import MPI
 import mdtraj as md
 import glob
+from msmbuilder.dataset import _keynat as keynat
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
