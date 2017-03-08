@@ -43,6 +43,10 @@ def main():
     args = parse_commandline()
     file_loc = args.f
     redo = args.r
+    process_all_replicas(file_loc,redo)
+    return
+
+def process_all_replicas(file_loc,redo=True):    
     sim_mdl = load(file_loc)
     os.chdir(sim_mdl.base_dir)
     tic_folder_list = sorted(glob.glob("tic*"),key=keynat)
@@ -68,7 +72,7 @@ def main():
     jobs =[(r1, r2, full_dict["%d_%d"%(r1,r2)]) for r1 in range(sim_mdl.n_tics)
            for r2 in range(sim_mdl.n_tics)]
     p.map(process_folder,jobs)
-
+    p.close()
     return
 
 if __name__ == "__main__":
