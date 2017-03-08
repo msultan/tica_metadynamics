@@ -5,7 +5,7 @@ from subprocess import call
 from multiprocessing import Pool
 from .utils import concatenate_folder
 from .plumed_writer import get_plumed_dict
-from jinga2 import Template
+from jinja2 import Template
 
 def process_folder(job_tuple):
     r1, r2, script = job_tuple
