@@ -1,6 +1,7 @@
 #!/bin/env python
 import socket
 from mpi4py import MPI
+import mdtraj as md
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
@@ -31,3 +32,23 @@ def get_gpu_index():
     hostname, gpu_index = comm.scatter(data,root=0)
     assert hostname==my_host_name
     return gpu_index
+
+
+def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb"):
+    flist = sorted(glob.glob("./%s/trajectory.dcd.bak.*"%fname), key=keynat)
+    flist.extend(glob.glob("./%s/trajectory.dcd"%fname))
+    print(flist)
+    top = md.load(top_loc)
+    trj_list=[]
+    for i in flist:
+        try:
+            trj_list.append(md.load_dcd(i,top=top))
+        except:
+            pass
+
+
+    trj = trj_list[0] + trj_list[1:]
+    trj.remove_solvent().save_xtc("%s/%s.xtc"%(fname,fname))
+    print("Found %d trajs"%len(trj_list))
+
+    return
