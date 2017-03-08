@@ -43,7 +43,7 @@ def process_all_replicas(file_loc,redo=True):
         for r2 in range(sim_mdl.n_tics):
             sim_mdl.bias_file ="r%s_r%s.bias"%(r1,r2)
             plumed_scripts_dict = get_plumed_dict(sim_mdl)
-            full_dict["%d_%d"%(r1,r2)] = plumed_scripts_dict[r2]
+            full_dict["%d_%d"%(r1,r2)] = plumed_scripts_dict[r1]
 
     p = Pool(n_tics)
     jobs =[(r1, r2, full_dict["%d_%d"%(r1,r2)]) for r1 in range(sim_mdl.n_tics)
