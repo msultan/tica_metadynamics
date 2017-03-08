@@ -27,25 +27,6 @@ def process_folder(job_tuple):
     os.chdir(base_dir)
     return
 
-
-def parse_commandline():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-f','--file', dest='f',
-                            default='./metad_sim.pkl',
-              help='TICA METAD location file')
-    parser.add_argument('-r','--redo', dest='r',
-                            default=True,
-              help='Redo trajectory concatenation')
-    return args
-
-
-def main():
-    args = parse_commandline()
-    file_loc = args.f
-    redo = args.r
-    process_all_replicas(file_loc,redo)
-    return
-
 def process_all_replicas(file_loc,redo=True):
     sim_mdl = load(file_loc)
     os.chdir(sim_mdl.base_dir)
@@ -74,6 +55,25 @@ def process_all_replicas(file_loc,redo=True):
     p.map(process_folder,jobs)
     p.close()
     return
+
+def parse_commandline():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f','--file', dest='f',
+                            default='./metad_sim.pkl',
+              help='TICA METAD location file')
+    parser.add_argument('-r','--redo', dest='r',
+                            default=True,
+              help='Redo trajectory concatenation')
+    return args
+
+
+def main():
+    args = parse_commandline()
+    file_loc = args.f
+    redo = args.r
+    process_all_replicas(file_loc,redo)
+    return
+
 
 if __name__ == "__main__":
     main()
