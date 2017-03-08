@@ -11,10 +11,11 @@ else:
 
 def test_setup():
     tica_mdl = load(os.path.join(base_dir,"landmark_mdl/tica_mdl.pkl"))
+    tica_data = load(os.path.join(base_dir,"landmark_mdl/tica_features.pkl"))
     df = load(os.path.join(base_dir,"./landmark_mdl/feature_descriptor.pkl"))
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
-        TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,
+        TicaMetadSim(base_dir=cur_dir,tica_data=tica_data, tica_mdl=tica_mdl,
                      data_frame=df, grid=False, interval=False,wall=False,
                      render_scripts=True)
 
@@ -28,10 +29,11 @@ def test_setup():
 
 def test_delete():
     tica_mdl = load(os.path.join(base_dir,"landmark_mdl/tica_mdl.pkl"))
+    tica_data = load(os.path.join(base_dir,"landmark_mdl/tica_features.pkl"))
     df = load(os.path.join(base_dir,"./landmark_mdl/feature_descriptor.pkl"))
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
-        TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,
+        TicaMetadSim(base_dir=cur_dir, tica_data=tica_data,tica_mdl=tica_mdl,
                      data_frame=df, grid=False, interval=False,render_scripts=True)
 
 
@@ -39,14 +41,14 @@ def test_delete():
         f.writelines("t")
         f.close()
 
-        TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,
+        TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,tica_data=tica_data,
                      data_frame=df, grid=False, interval=False,
                      delete_existing=False)
 
         assert os.path.isfile("tic_0/rand.txt")
 
 
-        TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,
+        TicaMetadSim(base_dir=cur_dir, tica_mdl=tica_mdl,tica_data=tica_data,
                      data_frame=df, grid=False, interval=False,
                      delete_existing=True)
 
