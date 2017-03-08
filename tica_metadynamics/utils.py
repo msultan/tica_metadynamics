@@ -44,7 +44,7 @@ def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb"):
     trj_list=[]
     for i in flist:
         try:
-            trj_list.append(md.load(i,top=top))
+            trj_list.append(md.load_dcd(i,top=top))
         except:
             pass
 
