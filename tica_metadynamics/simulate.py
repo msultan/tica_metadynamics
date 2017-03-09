@@ -60,8 +60,6 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
 
         if metad_sim.msm_swap_folder is not None and np.random.random() < 0.5:
             sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder)
-            comm.barrier()
-            continue
         #get old energy for just the plumed force
         old_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
             getPotentialEnergy().value_in_unit(kilojoule_per_mole)
