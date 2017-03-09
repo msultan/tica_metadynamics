@@ -114,7 +114,7 @@ def swap_with_msm_state(sim_obj, swap_folder):
     random_chck = np.random.choice(flist)
     print("Swapping with %s"%random_chck,flush=True)
     state = XmlSerializer.deserialize(open(random_chck).read())
-    print(state.getPositions()[:5])
+    print(state.getPositions()[:5],flush=True)
     sim_obj.context.setState(state)
     return sim_obj
 
@@ -149,10 +149,10 @@ def run_msm_meta_sim(file_loc="metad_sim.pkl"):
 
         if metad_sim.msm_swap_folder is not None and np.random.random() < 0.5:
             a=sim_obj.context.getState(getPositions=True)
-            print(a.getPositions()[:5])
+            print(a.getPositions()[:5],flush=True)
             sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder)
             a=sim_obj.context.getState(getPositions=True)
-            print(a.getPositions()[:5])
+            print(a.getPositions()[:5],flush=True)
             continue
         #get old energy for just the plumed force
         old_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
