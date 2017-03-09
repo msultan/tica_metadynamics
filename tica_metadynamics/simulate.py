@@ -9,6 +9,9 @@ import glob
 from simtk.unit import *
 from .plumed_writer import get_plumed_dict
 import os
+from simtk.openmm.app import *
+from simtk.openmm import *
+
 boltzmann_constant = 0.0083144621
 
 comm = MPI.COMM_WORLD
@@ -106,12 +109,12 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
     return
 
 def swap_with_msm_state(sim_obj, swap_folder):
-    flist = glob.glob(os.path.join(swap_folder,"checkpt*.chk"))
-    print("Found %d checkpoints"%len(flist),flush=True)
+    flist = glob.glob(os.path.join(swap_folder,"state*.xml"))
+    print("Found %d states"%len(flist),flush=True)
     random_chck = np.random.choice(flist)
     print("Swapping with %s"%random_chck,flush=True)
-    with open(random_chck, 'rb') as f:
-        sim_obj.context.loadCheckpoint(f.read())
+    state = XmlSerializer.deserialize(open(random_chck).read())
+    sim_obj.context.setState(state)
     return sim_obj
 
 def run_msm_meta_sim(file_loc="metad_sim.pkl"):
