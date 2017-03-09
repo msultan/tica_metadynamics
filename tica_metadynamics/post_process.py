@@ -1,6 +1,7 @@
 #!/bin/env python
 from msmbuilder.utils import load,dump
 import os,glob
+import argparse
 from subprocess import call
 from multiprocessing import Pool
 from .utils import concatenate_folder
@@ -29,13 +30,13 @@ def process_folder(job_tuple):
     os.chdir(base_dir)
     return
 
-def process_all_replicas(file_loc,redo=True):
+def process_all_replicas(file_loc,redo=True,stride=1):
     sim_mdl = load(file_loc)
     os.chdir(sim_mdl.base_dir)
     top_loc = glob.glob(os.path.join(sim_mdl.starting_coordinates_folder,"0.pdb"))[0]
     for i in range(sim_mdl.n_tics):
         if redo:
-            concatenate_folder("tic_%d"%i, top_loc)
+            concatenate_folder("tic_%d"%i, top_loc,stride)
 
     sim_mdl.pace = 1000000000
     sim_mdl.height = 0
@@ -62,6 +63,9 @@ def parse_commandline():
     parser.add_argument('-r','--redo', dest='r',
                             default=True,
               help='Redo trajectory concatenation')
+    parser.add_argument('-s','--stride', dest='s',
+                            default=1,
+              help='Stride for reading trajectory')
     args = parser.parse_args()
     return args
 
@@ -70,7 +74,8 @@ def main():
     args = parse_commandline()
     file_loc = args.f
     redo = args.r
-    process_all_replicas(file_loc,redo)
+    stride=args.s
+    process_all_replicas(file_loc,redo,stride)
     return
 
 

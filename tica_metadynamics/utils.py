@@ -37,7 +37,7 @@ def get_gpu_index():
     return gpu_index
 
 
-def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb"):
+def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb",stride=1):
     flist = sorted(glob.glob("./%s/trajectory.dcd.bak.*"%fname), key=keynat)
     flist.extend(glob.glob("./%s/trajectory.dcd"%fname))
     print(flist)
@@ -45,7 +45,7 @@ def concatenate_folder(fname, top_loc="./starting_coordinates/0.pdb"):
     trj_list=[]
     for i in flist:
         try:
-            trj_list.append(md.load_dcd(i,top=top))
+            trj_list.append(md.load_dcd(i,top=top,stride=stride))
         except:
             pass
 

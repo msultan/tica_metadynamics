@@ -18,7 +18,8 @@ setup(
     long_description=read('README.md'),
     entry_points = {
        'console_scripts': ['setup_tica_meta_sim=tica_metadynamics.setup_file:main',
-                           'run_tica_meta_sim=tica_metadynamics.simulate:main'],
+                           'run_tica_meta_sim=tica_metadynamics.simulate:main',
+                           'process_tica_meta_sim=tica_metadynamics.post_process:main'],
 
     }
 )
