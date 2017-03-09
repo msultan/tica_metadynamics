@@ -148,10 +148,10 @@ def run_msm_meta_sim(file_loc="metad_sim.pkl"):
         sim_obj.step(metad_sim.swap_rate)
 
         if metad_sim.msm_swap_folder is not None and np.random.random() < 0.5:
-            a=simulation.context.getState(getPositions=True)
+            a=sim_obj.context.getState(getPositions=True)
             print(a.getPositions()[:5])
             sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder)
-            a=simulation.context.getState(getPositions=True)
+            a=sim_obj.context.getState(getPositions=True)
             print(a.getPositions()[:5])
             continue
         #get old energy for just the plumed force
