@@ -118,7 +118,6 @@ def run_msm_meta_sim(file_loc="metad_sim.pkl"):
     from tica_metadynamics.load_sim import create_simulation
 
     metad_sim = load(file_loc)
-    metad_sim.msm_swap_folder="./test"
     if metad_sim.msm_swap_folder is not None:
         print("Found MSM state folder. Will swap all replicas with the MSM "
               "occasionally",flush=True)
