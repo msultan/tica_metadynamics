@@ -112,7 +112,7 @@ def swap_with_msm(sim_obj, swap_folder):
     print("Swapping with %s"%random_chck)
     with open(random_chck, 'rb') as f:
         sim_obj.context.loadCheckpoint(f.read())
-    return
+    return sim_obj
 
 def run_msm_meta_sim(file_loc="metad_sim.pkl"):
     from tica_metadynamics.load_sim import create_simulation
@@ -145,7 +145,7 @@ def run_msm_meta_sim(file_loc="metad_sim.pkl"):
         sim_obj.step(metad_sim.swap_rate)
 
         if metad_sim.msm_swap_folder is not None and np.random.random() < 0.2:
-            swap_with_msm_state(sim_obj,metad_sim.msm_swap_folder )
+            sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder)
             continue
         #get old energy for just the plumed force
         old_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
