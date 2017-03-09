@@ -18,7 +18,8 @@ class TicaMetadSim(object):
                             swap_rate=3000, n_iterations=1000,
                             platform='CUDA',
                             grid_mlpt_factor=.3,
-                            render_scripts=False):
+                            render_scripts=False,
+                            msm_swap_folder=None):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -90,6 +91,7 @@ class TicaMetadSim(object):
         self.sim_save_rate = sim_save_rate
         self.swap_rate = swap_rate
         self.plumed_scripts_dict = None
+        self.msm_swap_folder = msm_swap_folder
 
         self._setup()
         print("Dumping model into %s and writing "
