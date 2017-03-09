@@ -107,9 +107,9 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
 
 def swap_with_msm(sim_obj, swap_folder):
     flist = glob.glob(os.path.join(swap_folder,"checkpt*.chk"))
-    print("Found %d checkpoints"%len(flist))
+    print("Found %d checkpoints"%len(flist),flush=True)
     random_chck = np.random.choice(flist)
-    print("Swapping with %s"%random_chck)
+    print("Swapping with %s"%random_chck,flush=True)
     with open(random_chck, 'rb') as f:
         sim_obj.context.loadCheckpoint(f.read())
     return sim_obj
@@ -121,7 +121,7 @@ def run_msm_meta_sim(file_loc="metad_sim.pkl"):
     metad_sim.msm_swap_folder="./test"
     if metad_sim.msm_swap_folder is not None:
         print("Found MSM state folder. Will swap all replicas with the MSM "
-              "occasionally")
+              "occasionally",flush=True)
     #beta is 1/kt
     beta = 1/(boltzmann_constant * metad_sim.temp)
 
@@ -144,7 +144,7 @@ def run_msm_meta_sim(file_loc="metad_sim.pkl"):
         #2fs *3000 = 6ps
         sim_obj.step(metad_sim.swap_rate)
 
-        if metad_sim.msm_swap_folder is not None and np.random.random() < 0.2:
+        if metad_sim.msm_swap_folder is not None and np.random.random() < 0.5:
             sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder)
             continue
         #get old energy for just the plumed force
