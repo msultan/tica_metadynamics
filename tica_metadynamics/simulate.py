@@ -105,7 +105,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
 
     return
 
-def swap_with_msm(sim_obj, swap_folder):
+def swap_with_msm_state(sim_obj, swap_folder):
     flist = glob.glob(os.path.join(swap_folder,"checkpt*.chk"))
     print("Found %d checkpoints"%len(flist),flush=True)
     random_chck = np.random.choice(flist)
