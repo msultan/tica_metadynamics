@@ -19,13 +19,30 @@ size = comm.Get_size()
 rank = comm.Get_rank()
 
 
-def swap_with_msm_state(sim_obj, swap_folder):
+def swap_with_msm_state(sim_obj, swap_folder,force_group):
     flist = glob.glob(os.path.join(swap_folder,"state*.xml"))
     print("Found %d states"%len(flist), flush=True)
     random_chck = np.random.choice(flist)
-    print("Swapping with %s"%random_chck, flush=True)
-    state = XmlSerializer.deserialize(open(random_chck).read())
-    sim_obj.context.setState(state)
+    print("Attempting swap with %s"%random_chck, flush=True)
+    old_state=sim_obj.context.getState(getPositions=True, getVelocities=True,\
+        getForces=True,getEnergy=True,getParameters=True,enforcePeriodicBox=True)
+
+    old_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
+            getPotentialEnergy().value_in_unit(kilojoule_per_mole)
+
+    new_state = XmlSerializer.deserialize(open(random_chck).read())
+    sim_obj.context.setState(new_state)
+    new_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
+            getPotentialEnergy().value_in_unit(kilojoule_per_mole)
+    #if new_e < old_e , delta e is >0 and p ==1
+    delta_e = old_energy - new_energy
+    probability = np.min((1,np.exp(beta*delta_e)))
+    accept = np.random.random() < probability
+    if accept:
+        print("Swap accepted with %s"%random_chck)
+    else:
+        #reset back to old_state
+        sim_obj.context.setState(old_state)
     return sim_obj
 
 def run_meta_sim(file_loc="metad_sim.pkl"):
@@ -59,7 +76,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
         sim_obj.step(metad_sim.swap_rate)
 
         if metad_sim.msm_swap_folder is not None and np.random.random() < 0.5:
-            sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder)
+            sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder, force_group)
         #get old energy for just the plumed force
         old_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
             getPotentialEnergy().value_in_unit(kilojoule_per_mole)
