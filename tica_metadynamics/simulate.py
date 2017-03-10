@@ -19,7 +19,7 @@ size = comm.Get_size()
 rank = comm.Get_rank()
 
 
-def swap_with_msm_state(sim_obj, swap_folder,force_group):
+def swap_with_msm_state(sim_obj, swap_folder,force_group,beta):
     flist = glob.glob(os.path.join(swap_folder,"state*.xml"))
     print("Found %d states"%len(flist), flush=True)
     random_chck = np.random.choice(flist)
@@ -76,7 +76,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
         sim_obj.step(metad_sim.swap_rate)
 
         if metad_sim.msm_swap_folder is not None and np.random.random() < 0.5:
-            sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder, force_group)
+            sim_obj = swap_with_msm_state(sim_obj, metad_sim.msm_swap_folder, force_group,beta)
         #get old energy for just the plumed force
         old_energy = sim_obj.context.getState(getEnergy=True,groups={force_group}).\
             getPotentialEnergy().value_in_unit(kilojoule_per_mole)
