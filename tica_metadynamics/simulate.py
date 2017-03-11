@@ -145,6 +145,7 @@ def run_meta_sim(file_loc="metad_sim.pkl"):
 
 class TicaSimulator(object):
     def __init__(self, file_loc="metad_sim.pkl"):
+        from tica_metadynamics.load_sim import create_simulation
         self.file_loc = file_loc
         self.metad_sim = load(self.file_loc)
         self.beta = 1/(boltzmann_constant * self.metad_sim.temp)
