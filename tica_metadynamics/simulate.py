@@ -159,6 +159,7 @@ class TicaSimulator(object):
         flist = list(set(full_list).difference(set(self._tabu_list)))
         if len(flist)==0:
             flist = full_list
+            self._tabu_list = []
         print("Found %d states"%len(flist), flush=True)
         random_chck = np.random.choice(flist)
         self._tabu_list.append(random_chck)
