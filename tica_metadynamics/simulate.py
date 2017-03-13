@@ -156,7 +156,7 @@ class TicaSimulator(object):
 
     def mix_with_msm(self):
         full_list = glob.glob(os.path.join(self.metad_sim.msm_swap_folder,"state*.xml"))
-        if self.metad_sim.use_tabu:
+        if self.metad_sim.use_tabu_list:
             flist = list(set(full_list).difference(set(self._tabu_list)))
         else:
             flist = []
