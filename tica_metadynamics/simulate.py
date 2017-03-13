@@ -156,7 +156,10 @@ class TicaSimulator(object):
 
     def mix_with_msm(self):
         full_list = glob.glob(os.path.join(self.metad_sim.msm_swap_folder,"state*.xml"))
-        flist = list(set(full_list).difference(set(self._tabu_list)))
+        if self.metad_sim.use_tabu:
+            flist = list(set(full_list).difference(set(self._tabu_list)))
+        else:
+            flist = []
         if len(flist)==0:
             flist = full_list
             self._tabu_list = []
@@ -293,7 +296,8 @@ def parse_commandline():
 def main():
     args = parse_commandline()
     file_loc = args.f
-    run_meta_sim(file_loc)
+    sim_obj = TicaSimulator(file_loc)
+    sim_obj.run()
     return
 
 if __name__ == "__main__":
