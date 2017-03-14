@@ -27,7 +27,7 @@ plumed_wall_template = Template("{{wall_type}}_WALLS ARG={{arg}} AT={{at}} "
 
 plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{file}} ")
 
-
+_SUPPORTED_FEATS=["Contact","LandMarkFeaturizer","Dihedral","AlphaAngle"]
 
 
 def create_torsion_label(inds, label):
@@ -94,7 +94,7 @@ def get_interval(tica_data,lower,upper):
 
 def render_raw_features(df,inds):
     output = []
-    if df.featurizer[0] not in ["Contact","LandMarkFeaturizer","Dihedral"]:
+    if df.featurizer[0] not in _SUPPORTED_FEATS:
         raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
                          are supported for now")
     if df.featurizer[0] in ["Contact"] and df.featuregroup[0] not in ["ca"]:
@@ -134,7 +134,7 @@ def render_raw_features(df,inds):
 
 def render_mean_free_features(df,inds,tica_mdl):
     output = []
-    if df.featurizer[0] not in ["Contact","LandMarkFeaturizer","Dihedral"]:
+    if df.featurizer[0] not in _SUPPORTED_FEATS:
         raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
                          are supported for now")
     if df.featurizer[0] in ["Contact"] and df.featuregroup[0] not in ["ca"]:

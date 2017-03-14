@@ -10,7 +10,7 @@ def validate_plumed_script(sim_obj_loc = "metad_sim.pkl", featurizer=None, traj=
         raise ValueError("Featuizer cant be none if sim_obj doesnt "
                          "have featurizer object")
     if traj is None:
-        warnings.warn("No test trj foudm")
+        warnings.warn("No test trj found")
     # with enter_temp_directory():
     #     for i in range()
     f = open("./plumed.dat", 'w')
