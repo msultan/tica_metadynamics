@@ -85,7 +85,7 @@ class MetaProtein(object):
             ass_dict["%d"%(replica)] = self.prj.kmeans_mdl.transform(tica_feat)[0]
 
             for i in range(self.prj.n_tics_):
-                bias = np.loadtxt("%s/tic_%d/r%dt%d.BIAS"%(self.loc,replica,replica,i))
+                bias = np.loadtxt("%s/tic_%d/r%d_t%d.BIAS"%(self.loc,replica,replica,i))
                 #0 th column is time
                 # 1st column is tic val
                 # 2nd column is bias
