@@ -19,7 +19,8 @@ class TicaMetadSim(object):
                             platform='CUDA',
                             grid_mlpt_factor=.3,
                             render_scripts=False,
-                            msm_swap_folder=None,use_tabu_list=False):
+                            msm_swap_folder=None,use_tabu_list=False,
+                            swap_with_msm_once=True):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -94,7 +95,7 @@ class TicaMetadSim(object):
         self.plumed_scripts_dict = None
         self.msm_swap_folder = msm_swap_folder
         self.use_tabu_list = use_tabu_list
-
+        self.swap_with_msm_once = swap_with_msm_once
         self._setup()
         print("Dumping model into %s and writing "
               "submission scripts"%self.base_dir)

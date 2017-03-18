@@ -163,9 +163,14 @@ class TicaSimulator(object):
         if len(flist)==0:
             flist = full_list
             self._tabu_list = []
+
+        if len(flist)==0 and len(self._tabu_list)==len(full_list) \
+                and (hasattr(self.metad_sim,"swap_with_msm_once") and self.metad_sim.swap_with_msm_once):
+            print("Already done all possible MSM swaps. Returning")
+            return
+
         print("Found %d states"%len(flist), flush=True)
         random_chck = np.random.choice(flist)
-        self._tabu_list.append(random_chck)
         print("Attempting swap with %s"%random_chck, flush=True)
         old_state=self.sim_obj.context.getState(getPositions=True, getVelocities=True,\
         getForces=True,getEnergy=True,getParameters=True,enforcePeriodicBox=True)
@@ -183,6 +188,7 @@ class TicaSimulator(object):
         accept = np.random.random() < probability
         if accept:
             print("Swap accepted with %s"%random_chck)
+            self._tabu_list.append(random_chck)
         else:
             #reset back to old_state
             self.sim_obj.context.setState(old_state)
