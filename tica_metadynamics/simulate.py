@@ -160,14 +160,13 @@ class TicaSimulator(object):
             flist = list(set(full_list).difference(set(self._tabu_list)))
         else:
             flist = []
-        if len(flist)==0:
-            flist = full_list
-            self._tabu_list = []
-
         if len(flist)==0 and len(self._tabu_list)==len(full_list) \
                 and (hasattr(self.metad_sim,"swap_with_msm_once") and self.metad_sim.swap_with_msm_once):
             print("Already done all possible MSM swaps. Returning")
             return
+        if len(flist)==0:
+            flist = full_list
+            self._tabu_list = []
 
         print("Found %d states"%len(flist), flush=True)
         random_chck = np.random.choice(flist)
