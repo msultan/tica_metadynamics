@@ -126,10 +126,19 @@ class TicaSimulator(object):
             if rank==0:
                 s_i_j, e_i_j = data[i]
                 s_j_i, e_j_i = data[j]
-                delta_e = e_i_i+e_j_j - e_i_j - e_j_i
-                probability = np.min((1,np.exp(self.beta*delta_e)))
+                #delta e is old_energy minus new energy
+                delta_e = e_i_i + e_j_j - e_i_j - e_j_i
+                #if new energy is higher than old energy,
+                # delta_e is small-large < 0
+                if delta_e <= 0:
+                    probability = np.exp(self.beta * delta_e)
+                #if new energy is lower than older energy,
+                # delta_e is large-small > 0, i.e. accept
+                elif delta_e > 0 :
+                    probability = 1
                 print(e_i_i,e_j_j,e_i_j,e_j_i,probability)
-                if np.random.random() < probability :
+                # check if we are greater than 0
+                if probability >= np.random.random():
                     accepted= 1
                     print("Swapping out %d with %d"%(i,j),
                           flush=True)
