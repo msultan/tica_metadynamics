@@ -6,6 +6,7 @@ import numpy as np
 plumed_dist_template = Template("DISTANCE ATOMS={{atoms}} LABEL={{label}} ")
 plumed_torsion_template = Template("TORSION ATOMS={{atoms}} LABEL={{label}} ")
 plumed_rmsd_template = Template("RMSD REFERENCE={{loc}} TYPE=OPTIMAL LABEL={{label}} ")
+plumed_min_dist_template = Template("DISTANCES GROUPA={{group_a}} GROUPB={{group_b}} MIN={BETA={{beta}}} LABEL={{label}}")
 
 plumed_matheval_template = Template("MATHEVAL ARG={{arg}} FUNC={{func}} LABEL={{label}} PERIODIC={{periodic}} ")
 
@@ -37,6 +38,11 @@ def create_torsion_label(inds, label):
 def create_distance_label(inds, label):
     return plumed_dist_template.render(atoms=','.join(map(str, inds)), label=label) + "\n"
 
+def create_min_dist_label(group_a,group_b,beta,label):
+    return plumed_min_dist_template.render(group_a=','.join(map(str, group_a)),
+                                           group_b=','.join(map(str, group_b)),
+                                           beta=beta,
+                                           label=label)+ "\n"
 
 def create_rmsd_label(loc, label):
     return plumed_rmsd_template.render(loc=loc , label=label) + "\n"
@@ -97,13 +103,13 @@ def render_raw_features(df,inds):
     if df.featurizer[0] not in _SUPPORTED_FEATS:
         raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
                          are supported for now")
-    if df.featurizer[0] in ["Contact"] and df.featuregroup[0] not in ["ca"]:
-        raise ValueError("Sorry only ca contact are supported for now")
     possibles = globals().copy()
     possibles.update(locals())
 
-    if df.featurizer[0] == "Contact":
+    if df.featurizer[0] == "Contact" and len(df.atominds[0][0])==1:
         func = possibles.get("create_distance_label")
+    elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+        func = possibles.get("create_min_dist_label")
     elif df.featurizer[0] == "LandMarkFeaturizer":
         func = possibles.get("create_rmsd_label")
     else:
@@ -124,6 +130,11 @@ def render_raw_features(df,inds):
             #mdtraj is 0 indexed and plumed is 1 indexed
             if  df.featurizer[0] == "LandMarkFeaturizer":
                 output.append(func("../pdbs/%d.pdb"%feature_index , feat_label))
+            elif  df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+                output.append(func(group_a=np.array(atominds[0])+1,
+                                   group_b=np.array(atominds[1])+1,
+                                   beta=df.otherinfo[feature_index] ,
+                                   label=feat_label))
             else:
                 output.append(func(atominds + 1 , feat_label))
             output.append("\n")
@@ -137,9 +148,6 @@ def render_mean_free_features(df,inds,tica_mdl):
     if df.featurizer[0] not in _SUPPORTED_FEATS:
         raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
                          are supported for now")
-    if df.featurizer[0] in ["Contact"] and df.featuregroup[0] not in ["ca"]:
-        raise ValueError("Sorry only ca contact are supported for now")
-
     possibles = globals().copy()
     possibles.update(locals())
 
@@ -192,7 +200,8 @@ def render_tic(df,tica_mdl, tic_index=0):
 
     tic_coefficient = tica_mdl.components_[tic_index,]
     if tica_mdl.kinetic_mapping:
-        tic_coefficient *= tica_mdl.eigenvalues_[tic_index]
+        raise ValueError("Sorry but kinetic mapping or  is not supported for now")
+        #tic_coefficient *= tica_mdl.eigenvalues_[tic_index]
 
     arg=','.join(feature_labels)
     tic_coefficient = ','.join(map(str,tic_coefficient))
