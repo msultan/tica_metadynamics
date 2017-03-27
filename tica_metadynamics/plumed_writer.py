@@ -52,15 +52,19 @@ def create_mean_free_label(feature_label, offset, func=None,**kwargs):
     arg = feature_label
     if func is None:
         f = "x-%s"%offset
+        label= "meanfree_"+ "%s_"%func + feature_label
     elif func=="min":
-        f ="x.min-%s"%offset
+        f ="x-%s"%offset
+        label= "meanfree_"+ "%s_"%func + feature_label.strip(".min")
     elif func=="exp":
         f = "%s(-(x)^2/(2*%s^2))-%s"%(func,kwargs.pop("sigma"),offset)
+        label= "meanfree_"+ "%s_"%func + feature_label
     elif func in ["sin","cos"]:
         f = "%s(x)-%s"%(func, offset)
+        label= "meanfree_"+ "%s_"%func + feature_label
     else:
         raise ValueError("Can't find function")
-    label= "meanfree_"+ "%s_"%func + feature_label
+
 
     return plumed_matheval_template.render(arg=arg, func=f,\
                                            label=label,periodic="NO")
@@ -173,6 +177,8 @@ def render_mean_free_features(df,inds,tica_mdl):
         feat = j[1]["featuregroup"]
         if  df.featurizer[0] == "LandMarkFeaturizer":
             feat_label =  feat+"_%s"%feature_index
+        elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+            feat_label = feat+"_%s"%'_'.join(map(str,resids))+".min"
         else:
             feat_label = feat+"_%s"%'_'.join(map(str,resids))
 
