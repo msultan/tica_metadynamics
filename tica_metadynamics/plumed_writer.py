@@ -52,6 +52,8 @@ def create_mean_free_label(feature_label, offset, func=None,**kwargs):
     arg = feature_label
     if func is None:
         f = "x-%s"%offset
+    elif func=="min":
+        f ="x.min-%s"%offset
     elif func=="exp":
         f = "%s(-(x)^2/(2*%s^2))-%s"%(func,kwargs.pop("sigma"),offset)
     elif func in ["sin","cos"]:
@@ -153,8 +155,10 @@ def render_mean_free_features(df,inds,tica_mdl):
 
     sigma = None
 
-    if df.featurizer[0] == "Contact":
+    if df.featurizer[0] == "Contact" and len(df.atominds[0][0])==1:
         func = np.repeat(None, len(inds))
+    elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+        func = np.repeat("min", len(inds))
     elif df.featurizer[0] == "LandMarkFeaturizer":
         func = np.repeat("exp", len(inds))
         sigma =  df.otherinfo[0]
@@ -184,8 +188,10 @@ def render_tic(df,tica_mdl, tic_index=0):
     inds = np.nonzero(tica_mdl.components_[tic_index,:])[0]
     template = Template("meanfree_{{func}}_{{feature_group}}_{{feature_index}}")
 
-    if df.featurizer[0] == "Contact":
+    if df.featurizer[0] == "Contact" and len(df.atominds[0][0])==1:
         func = np.repeat(None, len(inds))
+    elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+        func = np.repeat("min", len(inds))
     elif df.featurizer[0] == "LandMarkFeaturizer":
         func = np.repeat("exp", len(inds))
     else:
