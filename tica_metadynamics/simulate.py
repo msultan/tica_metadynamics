@@ -92,7 +92,7 @@ class TicaSimulator(object):
             self.featurizer = self.metad_sim.featurizer
             self.tica_mdl = self.metad_sim.tica_mdl
             self.kmeans_mdl  = self.metad_sim.kmeans_mdl
-            self.top = app.PDBFile(self.metad_sim.starting_coordinates_folder,"0.pdb")
+            self.top = app.PDBFile(os.path.join(self.metad_sim.starting_coordinates_folder,"0.pdb"))
             self.known_msm_states = {}
             for i in self.full_list:
                 state = XmlSerializer.deserialize(open(i).read())
