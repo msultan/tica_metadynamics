@@ -8,7 +8,10 @@ from .plumed_writer import get_interval, get_plumed_dict
 class TicaMetadSim(object):
     def __init__(self, base_dir="./", starting_coordinates_folder="./starting_coordinates",
                             n_tics=1,tica_mdl="tica_mdl.pkl", tica_data="tica_data.pkl",
-                            data_frame="feature_descriptor.pkl", grid=False,
+                            data_frame="feature_descriptor.pkl",
+                            featurizer="featurizer.pkl",
+                            kmeans_mdl ="kmeans_mdl.pkl",
+                            grid=False,
                             interval=False,wall=False,
                             pace=1000, stride=1000,
                             temp=300, biasfactor=50, height=1.0,
@@ -19,11 +22,17 @@ class TicaMetadSim(object):
                             platform='CUDA',
                             grid_mlpt_factor=.3,
                             render_scripts=False,
-                            msm_swap_folder=None,use_tabu_list=False,
-                            swap_with_msm_once=True):
+                            msm_swap_folder=None,
+                            msm_swap_scheme='random'):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
+
+        if type(featurizer)==str:
+            self.featurizer = load(featurizer)
+        else:
+            self.featurizer = featurizer
+
         if type(tica_mdl)==str:
             self.tica_mdl = load(tica_mdl)
         else:
@@ -38,6 +47,11 @@ class TicaMetadSim(object):
             self.data_frame = load(data_frame)
         else:
             self.data_frame = data_frame
+
+        if type(kmeans_mdl)==str:
+            self.kmeans_mdl = load(kmeans_mdl)
+        else:
+            self.kmeans_mdl = kmeans_mdl
 
         self.grid = grid
         self.grid_mlpt_factor = grid_mlpt_factor
@@ -94,8 +108,8 @@ class TicaMetadSim(object):
         self.swap_rate = swap_rate
         self.plumed_scripts_dict = None
         self.msm_swap_folder = msm_swap_folder
-        self.use_tabu_list = use_tabu_list
-        self.swap_with_msm_once = swap_with_msm_once
+
+        self.msm_swap_scheme = msm_swap_scheme
         self._setup()
         print("Dumping model into %s and writing "
               "submission scripts"%self.base_dir)

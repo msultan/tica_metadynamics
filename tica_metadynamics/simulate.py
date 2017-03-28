@@ -58,7 +58,11 @@ class TicaSimulator(object):
         self.size = size
         self.host_name = socket.gethostname()
         self.gpu_index = get_gpu_index()
-        self._tabu_list=[]
+
+        #setup MSM swap stuff
+        if self.metad_sim.msm_swap_folder is not None:
+            self.setup_msm_swap()
+
         print("Hello from rank %d running tic %d on "
           "host %s with gpu %d"%(self.rank, self.rank,
                                  self.host_name, self.gpu_index))
@@ -77,6 +81,31 @@ class TicaSimulator(object):
                       "DeltaE","Temp","Beta","Probability","Accepted"]
             self.log_file.writelines("#{}\t{}\t{}\t{}\t{}\t{}"
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\n".format(*header))
+
+    def setup_msm_swap(self):
+        self.full_list =  glob.glob(os.path.join(self.metad_sim.msm_swap_folder,"state*.xml"))
+        if self.metad_sim.msm_swap_scheme == 'random':
+            pass
+        elif self.metad_sim.msm_swap_scheme == 'swap_once':
+            self._tabu_list=[]
+        elif self.metad_sim.msm_swap_scheme == 'tabu_list':
+            self.featurizer = self.metad_sim.featurizer
+            self.tica_mdl = self.metad_sim.tica_mdl
+            self.kmeans_mdl  = self.metad_sim.kmeans_mdl
+            self.top = app.PDBFile(self.metad_sim.starting_coordinates_folder,"0.pdb")
+            self.known_msm_states = {}
+            for i in self.full_list:
+                state = XmlSerializer.deserialize(open(i).read())
+                self.top.xyz=np.array(state.getPositions()/nanometer)
+                self.known_msm_states[i] = self.kmeans_mdl.transform(
+                                                            self.tica_mdl.transform(
+                                                                self.featurizer.tranform([self.top])
+                                                            ))[0]
+                print(i,self.known_msm_states[i])
+        else:
+            raise ValueError("MSM swap scheme is invalid")
+
+        return
 
     def run(self):
         for step in range(self.metad_sim.n_iterations):
@@ -168,18 +197,24 @@ class TicaSimulator(object):
         return
 
     def mix_with_msm(self):
-        full_list = glob.glob(os.path.join(self.metad_sim.msm_swap_folder,"state*.xml"))
-        if self.metad_sim.use_tabu_list:
-            flist = list(set(full_list).difference(set(self._tabu_list)))
+        if self.metad_sim.msm_swap_scheme=='random':
+            flist = self.full_list
+        elif self.metad_sim.msm_swap_scheme == 'swap_once':
+            flist = list(set(self.full_list).difference(set(self._tabu_list)))
+        elif self.metad_sim.msm_swap_scheme == 'tabu_list':
+            current_traj = md.load("./trajectory.dcd", top=self.top)
+            current_states = self.kmeans_mdl.transform(self.tica_mdl.transform(
+                                                self.featurizer.tranform([current_traj])))[0]
+            current_states =  np.unique(current_states)
+            flist = [fname for fname in self.known_msm_states.keys()
+                     if self.known_msm_states[fname]
+                               not in current_states]
         else:
-            flist = []
-        if len(flist)==0 and len(self._tabu_list)==len(full_list) \
-                and (hasattr(self.metad_sim,"swap_with_msm_once") and self.metad_sim.swap_with_msm_once):
+            raise ValueError("Sorry that MSM sampler is not implemented")
+
+        if len(flist)==0 and len(self._tabu_list)==len(full_list):
             print("Already done all possible MSM swaps. Returning")
             return
-        if len(flist)==0:
-            flist = full_list
-            self._tabu_list = []
 
         print("Found %d states"%len(flist), flush=True)
         random_chck = np.random.choice(flist)
