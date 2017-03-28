@@ -9,9 +9,9 @@ import glob
 from simtk.unit import *
 from .plumed_writer import get_plumed_dict
 import os
+import mdtraj as md 
 from simtk.openmm.app import *
 from simtk.openmm import *
-
 boltzmann_constant = 0.0083144621
 
 comm = MPI.COMM_WORLD
@@ -92,15 +92,15 @@ class TicaSimulator(object):
             self.featurizer = self.metad_sim.featurizer
             self.tica_mdl = self.metad_sim.tica_mdl
             self.kmeans_mdl  = self.metad_sim.kmeans_mdl
-            self.top = app.PDBFile(os.path.join(self.metad_sim.starting_coordinates_folder,"0.pdb"))
+            self.top = md.load(os.path.join(self.metad_sim.starting_coordinates_folder,"0.pdb"))
             self.known_msm_states = {}
             for i in self.full_list:
                 state = XmlSerializer.deserialize(open(i).read())
                 self.top.xyz=np.array(state.getPositions()/nanometer)
                 self.known_msm_states[i] = self.kmeans_mdl.transform(
                                                             self.tica_mdl.transform(
-                                                                self.featurizer.tranform([self.top])
-                                                            ))[0]
+                                                                self.featurizer.transform([self.top])
+                                                            ))[0][0]
                 print(i,self.known_msm_states[i])
         else:
             raise ValueError("MSM swap scheme is invalid")
@@ -204,11 +204,13 @@ class TicaSimulator(object):
         elif self.metad_sim.msm_swap_scheme == 'tabu_list':
             current_traj = md.load("./trajectory.dcd", top=self.top)
             current_states = self.kmeans_mdl.transform(self.tica_mdl.transform(
-                                                self.featurizer.tranform([current_traj])))[0]
+                                                self.featurizer.transform([current_traj])))[0]
             current_states =  np.unique(current_states)
+            print(current_states)
             flist = [fname for fname in self.known_msm_states.keys()
                      if self.known_msm_states[fname]
                                not in current_states]
+            print(len(flist))
         else:
             raise ValueError("Sorry that MSM sampler is not implemented")
 
@@ -235,7 +237,8 @@ class TicaSimulator(object):
         accept = np.random.random() < probability
         if accept:
             print("Swap accepted with %s"%random_chck)
-            self._tabu_list.append(random_chck)
+            if self.metad_sim.msm_swap_scheme == 'swap_once':
+                self._tabu_list.append(random_chck)
         else:
             #reset back to old_state
             self.sim_obj.context.setState(old_state)
