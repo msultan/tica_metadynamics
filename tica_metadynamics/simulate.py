@@ -214,7 +214,7 @@ class TicaSimulator(object):
         else:
             raise ValueError("Sorry that MSM sampler is not implemented")
 
-        if len(flist)==0 and len(self._tabu_list)==len(full_list):
+        if len(flist)==0 and self.metad_sim.msm_swap_scheme in ["swap_once", "tabu_list"]:
             print("Already done all possible MSM swaps. Returning")
             return
 
