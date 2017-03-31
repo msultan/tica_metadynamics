@@ -88,7 +88,7 @@ class TicaSimulator(object):
             pass
         elif self.metad_sim.msm_swap_scheme == 'swap_once':
             self._tabu_list=[]
-        elif self.metad_sim.msm_swap_scheme == 'tabu_list':
+        elif self.metad_sim.msm_swap_scheme in ['tabu_list','min_count']:
             self.featurizer = self.metad_sim.featurizer
             self.tica_mdl = self.metad_sim.tica_mdl
             self.kmeans_mdl  = self.metad_sim.kmeans_mdl
@@ -201,16 +201,28 @@ class TicaSimulator(object):
             flist = self.full_list
         elif self.metad_sim.msm_swap_scheme == 'swap_once':
             flist = list(set(self.full_list).difference(set(self._tabu_list)))
-        elif self.metad_sim.msm_swap_scheme == 'tabu_list':
+        elif self.metad_sim.msm_swap_scheme in ['tabu_list',"min_count"]:
             current_traj = md.load("./trajectory.dcd", top=self.top)
             current_states = self.kmeans_mdl.transform(self.tica_mdl.transform(
                                                 self.featurizer.transform([current_traj])))[0]
-            current_states =  np.unique(current_states)
-            print(current_states)
-            flist = [fname for fname in self.known_msm_states.keys()
-                     if self.known_msm_states[fname]
-                               not in current_states]
-            print(len(flist))
+
+            if self.metad_sim.msm_swap_scheme == 'tabu_list':
+                current_states =  np.unique(current_states)
+                flist = [fname for fname in self.known_msm_states.keys()
+                         if self.known_msm_states[fname]
+                                   not in current_states]
+            else:
+                #count accessible states
+                flist = []
+                bin_counts = np.bincount(current_states,
+                                         minlength=self.kmeans_mdl.n_clusters)
+                bin_priority = np.argsort(bin_counts)
+
+                for bin_index in bin_priority:
+                    tmp_fname = os.path.join(self.metad_sim.msm_swap_folder,"state%.xml"%bin_index)
+                    if tmp_fname in self.known_msm_states.keys():
+                        flist = [tmp_fname]
+                        continue
         else:
             raise ValueError("Sorry that MSM sampler is not implemented")
 
