@@ -217,19 +217,16 @@ class TicaSimulator(object):
                 bin_counts = np.bincount(current_states,
                                          minlength=self.kmeans_mdl.n_clusters)
                 bin_priority = np.argsort(bin_counts)
-
                 for bin_index in bin_priority:
-                    tmp_fname = os.path.join(self.metad_sim.msm_swap_folder,"state%.xml"%bin_index)
-                    if tmp_fname in self.known_msm_states.keys():
-                        flist = [tmp_fname]
-                        continue
+                    flist = [fname for fname in self.known_msm_states.keys()
+                         if self.known_msm_states[fname]==bin_index]
+                    if len(flist)>0:
+                        break
         else:
             raise ValueError("Sorry that MSM sampler is not implemented")
-
         if len(flist)==0 and self.metad_sim.msm_swap_scheme in ["swap_once", "tabu_list"]:
             print("Already done all possible MSM swaps. Returning")
             return
-
         print("Found %d states"%len(flist), flush=True)
         random_chck = np.random.choice(flist)
         print("Attempting swap with %s"%random_chck, flush=True)
