@@ -8,12 +8,13 @@ slurm_temp = Template("#!/bin/bash \n"
                       "#SBATCH -n {{n_tics}} \n"
                       "#SBATCH --gres=gpu:{{n_tics}} \n"
                       "#SBATCH -t 23:59:00 \n"
+                      "#SBATCH --no-requeue\n"
                       "module purge \n"
                       "source ~/.bash_profile \n"
                       "echo $CUDA_VISIBLE_DEVICES \n"
                       "cd {{base_dir}} \n"
                       "sbatch --dependency=afterany:$SLURM_JOB_ID sub.sh \n"
-                      "srun run_meta_sim --loc=./metad_sim.pkl")
+                      "srun run_tica_meta_sim")
 
 
 
