@@ -352,8 +352,12 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                                           **kwargs))
         if type(height) == list:
             current_height = height[i]
+        else:
+            current_height = height
         if type(sigma) == list:
             current_sigma = sigma[i]
+        else:
+            current_sigma = sigma
         output.append(render_metad_code(arg="tic%d"%i,
                                         sigma=current_sigma,
                                         height=current_height,
