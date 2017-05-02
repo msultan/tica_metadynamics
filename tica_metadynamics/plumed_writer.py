@@ -350,9 +350,13 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
             output.append(render_tic_wall(arg="tic%d"%i,
                                           wall_limts=wall_list[i],
                                           **kwargs))
+        if type(height) == list:
+            current_height = height[i]
+        if type(sigma) == list:
+            current_sigma = sigma[i]
         output.append(render_metad_code(arg="tic%d"%i,
-                                        sigma=sigma,
-                                        height=height,
+                                        sigma=current_sigma,
+                                        height=current_height,
                                         hills=hills_file,
                                         biasfactor=biasfactor,
                                         pace=pace,
