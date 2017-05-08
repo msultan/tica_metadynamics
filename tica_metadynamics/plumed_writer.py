@@ -57,7 +57,7 @@ def create_mean_free_label(feature_label, offset, func=None,**kwargs):
         f ="x-%s"%offset
         label= "meanfree_"+ "%s_"%func + feature_label.strip(".min")
     elif func=="exp":
-        f = "%s(-(x)^2/(2*%s^2))-%s"%(func,kwargs.pop("sigma"),offset)
+        f = "%s(-(x)^2/(2*%s^2))-%s"%(func,kwargs.pop("sigma"), offset)
         label= "meanfree_"+ "%s_"%func + feature_label
     elif func in ["sin","cos"]:
         f = "%s(x)-%s"%(func, offset)
@@ -104,22 +104,24 @@ def get_interval(tica_data,lower,upper):
         res = np.percentile(np.concatenate([i for i in tica_data]),(lower, upper), axis=0)
     return [i for i in zip(res[0],res[1])]
 
+def get_feature_function(df, feature_index):
+    if df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])==1:
+        func = possibles.get("create_distance_label")
+    elif df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])>1:
+        func = possibles.get("create_min_dist_label")
+    elif df.featurizer[feature_index] == "LandMarkFeaturizer":
+        func = possibles.get("create_rmsd_label")
+    else:
+        func = possibles.get("create_torsion_label")
+    return func
+
 def render_raw_features(df,inds):
     output = []
-    if df.featurizer[0] not in _SUPPORTED_FEATS:
+    if np.unique(df.featurizer) not in _SUPPORTED_FEATS:
         raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
                          are supported for now")
     possibles = globals().copy()
     possibles.update(locals())
-
-    if df.featurizer[0] == "Contact" and len(df.atominds[0][0])==1:
-        func = possibles.get("create_distance_label")
-    elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
-        func = possibles.get("create_min_dist_label")
-    elif df.featurizer[0] == "LandMarkFeaturizer":
-        func = possibles.get("create_rmsd_label")
-    else:
-        func = possibles.get("create_torsion_label")
 
     already_done_list = []
 
@@ -128,6 +130,7 @@ def render_raw_features(df,inds):
         atominds = np.array(j[1]["atominds"])
         resids = j[1]["resids"]
         feat = j[1]["featuregroup"]
+        func = get_feature_function(df, feature_index)
         if  df.featurizer[0] == "LandMarkFeaturizer":
             feat_label =  feat+"_%s"%feature_index
         else:
