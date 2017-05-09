@@ -214,15 +214,8 @@ def render_tic(df,tica_mdl, tic_index=0):
     inds = np.nonzero(tica_mdl.components_[tic_index,:])[0]
     template = Template("meanfree_{{func}}_{{feature_group}}_{{feature_index}}")
 
-    if df.featurizer[0] == "Contact" and len(df.atominds[0][0])==1:
-        func = np.repeat(None, len(inds))
-    elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
-        func = np.repeat("min", len(inds))
-    elif df.featurizer[0] == "LandMarkFeaturizer":
-        func = np.repeat("exp", len(inds))
-    else:
-        func = df.otherinfo[inds]
 
+    func = [match_mean_free_function(df, i) for i in range(len(df))]
     if  df.featurizer[0] == "LandMarkFeaturizer":
         feat_labels =  [i for i in range(len(df))]
     else:
