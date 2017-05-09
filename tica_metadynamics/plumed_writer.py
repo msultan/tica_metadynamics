@@ -391,6 +391,10 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 def get_plumed_dict(metad_sim):
     if  type(metad_sim)==str:
         metad_sim = load(metad_sim)
+    try:
+        nrm = metad_sim.nrm
+    except:
+        nrm=None
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
@@ -403,4 +407,5 @@ def get_plumed_dict(metad_sim):
                                    height=metad_sim.height, biasfactor=metad_sim.biasfactor,
                                     temp=metad_sim.temp, sigma=metad_sim.sigma,
                                    stride=metad_sim.stride, hills_file=metad_sim.hills_file,
-                                    bias_file=metad_sim.bias_file, label=metad_sim.label)
+                                   bias_file=metad_sim.bias_file, label=metad_sim.label,
+                                   nrm = nrm)
