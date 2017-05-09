@@ -48,19 +48,24 @@ def create_rmsd_label(loc, label):
     return plumed_rmsd_template.render(loc=loc , label=label) + "\n"
 
 
-def create_mean_free_label(feature_label, offset, func=None,**kwargs):
+def create_mean_free_label(feature_label, offset, func=None,
+                    feature_mean=None, feature_scale=None, **kwargs):
     arg = feature_label
+    if feature_scale is not None and feature_mean is not None:
+        x = "((x-%s)/%s)"%(feature_mean, feature_scale)
+    else:
+        x="x"
     if func is None:
-        f = "x-%s"%offset
+        f = "%s-%s"%(x,offset)
         label= "meanfree_"+ "%s_"%func + feature_label
     elif func=="min":
-        f ="x-%s"%offset
+        f ="%s-%s"%(x, offset)
         label= "meanfree_"+ "%s_"%func + feature_label.strip(".min")
     elif func=="exp":
-        f = "%s(-(x)^2/(2*%s^2))-%s"%(func,kwargs.pop("sigma"), offset)
+        f = "%s(-(%s)^2/(2*%s^2))-%s"%(func, x, kwargs.pop("sigma"), offset)
         label= "meanfree_"+ "%s_"%func + feature_label
     elif func in ["sin","cos"]:
-        f = "%s(x)-%s"%(func, offset)
+        f = "%s(%s)-%s"%(func,x,offset)
         label= "meanfree_"+ "%s_"%func + feature_label
     else:
         raise ValueError("Can't find function")
@@ -105,6 +110,8 @@ def get_interval(tica_data,lower,upper):
     return [i for i in zip(res[0],res[1])]
 
 def get_feature_function(df, feature_index):
+    possibles = globals().copy()
+    possibles.update(locals())
     if df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])==1:
         func = possibles.get("create_distance_label")
     elif df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])>1:
@@ -117,7 +124,7 @@ def get_feature_function(df, feature_index):
 
 def render_raw_features(df,inds):
     output = []
-    if np.unique(df.featurizer) not in _SUPPORTED_FEATS:
+    if not set(df.featurizer).issubset(set(_SUPPORTED_FEATS)):
         raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
                          are supported for now")
     possibles = globals().copy()
@@ -131,15 +138,15 @@ def render_raw_features(df,inds):
         resids = j[1]["resids"]
         feat = j[1]["featuregroup"]
         func = get_feature_function(df, feature_index)
-        if  df.featurizer[0] == "LandMarkFeaturizer":
+        if  df.featurizer[feature_index] == "LandMarkFeaturizer":
             feat_label =  feat+"_%s"%feature_index
         else:
             feat_label = feat+"_%s"%'_'.join(map(str,resids))
         if feat_label not in already_done_list:
             #mdtraj is 0 indexed and plumed is 1 indexed
-            if  df.featurizer[0] == "LandMarkFeaturizer":
+            if  df.featurizer[feature_index] == "LandMarkFeaturizer":
                 output.append(func("../pdbs/%d.pdb"%feature_index , feat_label))
-            elif  df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+            elif  df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])>1:
                 output.append(func(group_a=np.array(atominds[0])+1,
                                    group_b=np.array(atominds[1])+1,
                                    beta=df.otherinfo[feature_index] ,
@@ -151,26 +158,26 @@ def render_raw_features(df,inds):
 
     return ''.join(output)
 
-
-def render_mean_free_features(df,inds,tica_mdl):
-    output = []
-    if df.featurizer[0] not in _SUPPORTED_FEATS:
-        raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
-                         are supported for now")
+def match_mean_free_function(df, feature_index):
     possibles = globals().copy()
     possibles.update(locals())
-
-    sigma = None
-
-    if df.featurizer[0] == "Contact" and len(df.atominds[0][0])==1:
-        func = np.repeat(None, len(inds))
-    elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
-        func = np.repeat("min", len(inds))
-    elif df.featurizer[0] == "LandMarkFeaturizer":
-        func = np.repeat("exp", len(inds))
-        sigma =  df.otherinfo[0]
+    if df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])==1:
+        func = None
+    elif df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])>1:
+        func = "min"
+    elif df.featurizer[feature_index] == "LandMarkFeaturizer":
+        func = "exp"
+        sigma =  df.otherinfo[feature_index]
     else:
-        func = list(df.otherinfo[inds])
+        func = df.otherinfo[feature_index]
+    return func
+
+def render_mean_free_features(df, inds, tica_mdl, nrm=None):
+    output = []
+    if not set(df.featurizer).issubset(set(_SUPPORTED_FEATS)):
+        raise ValueError("Sorry only contact, landmark, and dihedral featuizers\
+                         are supported for now")
+
 
     for j in df.iloc[inds].iterrows():
         feature_index = j[0]
@@ -178,16 +185,26 @@ def render_mean_free_features(df,inds,tica_mdl):
         feat = j[1]["featuregroup"]
         resids = j[1]["resids"]
         feat = j[1]["featuregroup"]
-        if  df.featurizer[0] == "LandMarkFeaturizer":
+        func = match_mean_free_function(df, feature_index,)
+        if  df.featurizer[feature_index] == "LandMarkFeaturizer":
             feat_label =  feat+"_%s"%feature_index
-        elif df.featurizer[0] == "Contact" and len(df.atominds[0][0])>1:
+        elif df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])>1:
             feat_label = feat+"_%s"%'_'.join(map(str,resids))+".min"
         else:
             feat_label = feat+"_%s"%'_'.join(map(str,resids))
-
-        output.append(create_mean_free_label(feature_label=feat_label,\
+        sigma = None
+        if nrm is not None:
+            output.append(create_mean_free_label(feature_label=feat_label,\
                                              offset=tica_mdl.means_[feature_index],\
-                                             func =func[feature_index], sigma=sigma)+"\n")
+                                             func =func, \
+                                             feature_mean = nrm.mean_[feature_index],
+                                             feature_scale = nrm.scale_[feature_index],
+                                             sigma=sigma)+"\n")
+
+        else:
+            output.append(create_mean_free_label(feature_label=feat_label,\
+                                             offset=tica_mdl.means_[feature_index],\
+                                             func =func, sigma=sigma)+"\n")
         output.append("\n")
 
     return ''.join(output)
@@ -310,7 +327,7 @@ def render_tic_wall(arg,wall_limts,**kwargs):
     return ''.join(output)
 
 def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=None,
-                            wall_list=None,
+                            wall_list=None,nrm=None,
                              pace=1000,  height=1.0, biasfactor=50,
                             temp=300, sigma=0.2, stride=1000, hills_file="HILLS",
                             bias_file="BIAS", label="metad",**kwargs):
@@ -337,7 +354,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 
     inds = np.arange(tica_mdl.n_features)
     raw_feats = render_raw_features(df,inds)
-    mean_feats = render_mean_free_features(df,inds,tica_mdl)
+    mean_feats = render_mean_free_features(df,inds,tica_mdl,nrm)
 
     if grid_list is None:
         grid_list = np.repeat(None,n_tics)
@@ -382,12 +399,17 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 def get_plumed_dict(metad_sim):
     if  type(metad_sim)==str:
         metad_sim = load(metad_sim)
+    try:
+        nrm = getattr(metad_sim,"nrm")
+    except:
+        pass
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
                                    grid=metad_sim.grid,
                                    interval=metad_sim.interval,
                                     wall_list=metad_sim.wall_list,
+                                   nrm = nrm,
                                    grid_list=metad_sim.grid_list,
                                    interval_list=metad_sim.interval_list,
                                     pace=metad_sim.pace,
