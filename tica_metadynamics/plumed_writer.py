@@ -51,22 +51,40 @@ def create_rmsd_label(loc, label):
 def create_mean_free_label(feature_label, offset, func=None,
                     feature_mean=None, feature_scale=None, **kwargs):
     arg = feature_label
-    if feature_scale is not None and feature_mean is not None:
-        x = "((x-%s)/%s)"%(feature_mean, feature_scale)
-    else:
-        x="x"
+    # if feature_scale is not None and feature_mean is not None:
+    #     x = "((x-%s)/%s)"%(feature_mean, feature_scale)
+    # else:
+    #     x="x"
+    x="x"
     if func is None:
-        f = "%s-%s"%(x,offset)
+        if feature_scale is not None and feature_mean is not None:
+            f ="(%s-%s)/%s-%s"%(x,feature_mean, feature_scale, offset)
+        else:
+            f ="%s-%s"%(x, offset)
         label= "meanfree_"+ "%s_"%func + feature_label
+
     elif func=="min":
-        f ="%s-%s"%(x, offset)
+        if feature_scale is not None and feature_mean is not None:
+            f ="(%s-%s)/%s-%s"%(x,feature_mean, feature_scale, offset)
+        else:
+            f ="%s-%s"%(x, offset)
         label= "meanfree_"+ "%s_"%func + feature_label.strip(".min")
+
     elif func=="exp":
-        f = "%s(-(%s)^2/(2*%s^2))-%s"%(func, x, kwargs.pop("sigma"), offset)
+        if feature_scale is not None and feature_mean is not None:
+            f ="(%s(-(%s)^2/(2*%s^2)))-%s)/%s-%s"%(func, x,kwargs.pop("sigma"),
+                                                   feature_mean, feature_scale, offset)
+        else:
+            f = "%s(-(%s)^2/(2*%s^2))-%s"%(func, x, kwargs.pop("sigma"), offset)
         label= "meanfree_"+ "%s_"%func + feature_label
+
     elif func in ["sin","cos"]:
-        f = "%s(%s)-%s"%(func,x,offset)
+        if feature_scale is not None and feature_mean is not None:
+            f = "(%s(%s)-%s)/%s-%s"%(func,x,feature_mean, feature_scale, offset)
+        else:
+            f = "%s(%s)-%s"%(func,x,offset)
         label= "meanfree_"+ "%s_"%func + feature_label
+
     else:
         raise ValueError("Can't find function")
 
