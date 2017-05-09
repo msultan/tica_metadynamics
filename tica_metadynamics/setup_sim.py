@@ -11,6 +11,7 @@ class TicaMetadSim(object):
                             data_frame="feature_descriptor.pkl",
                             featurizer=None,
                             kmeans_mdl =None,
+                            nrm = None,
                             grid=False,
                             interval=False,wall=False,
                             pace=1000, stride=1000,
@@ -52,6 +53,11 @@ class TicaMetadSim(object):
             self.kmeans_mdl = load(kmeans_mdl)
         else:
             self.kmeans_mdl = kmeans_mdl
+
+        if type(nrm)==str:
+            self.nrm = load(nrm)
+        else:
+            self.nrm = nrm
 
         self.grid = grid
         self.grid_mlpt_factor = grid_mlpt_factor

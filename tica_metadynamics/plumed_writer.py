@@ -402,7 +402,7 @@ def get_plumed_dict(metad_sim):
     try:
         nrm = getattr(metad_sim,"nrm")
     except:
-        pass
+        nrm = None
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
