@@ -214,8 +214,7 @@ def render_tic(df,tica_mdl, tic_index=0):
     inds = np.nonzero(tica_mdl.components_[tic_index,:])[0]
     template = Template("meanfree_{{func}}_{{feature_group}}_{{feature_index}}")
 
-
-    func = [match_mean_free_function(df, i) for i in range(len(df))]
+    func = np.array([match_mean_free_function(df, i) for i in inds])
     if  df.featurizer[0] == "LandMarkFeaturizer":
         feat_labels =  [i for i in range(len(df))]
     else:
@@ -225,7 +224,7 @@ def render_tic(df,tica_mdl, tic_index=0):
 
     tic_coefficient = tica_mdl.components_[tic_index,]
     if tica_mdl.kinetic_mapping:
-        raise ValueError("Sorry but kinetic mapping or  is not supported for now")
+        raise ValueError("Sorry but kinetic mapping or is not supported for now")
         #tic_coefficient *= tica_mdl.eigenvalues_[tic_index]
 
     arg=','.join(feature_labels)
@@ -392,17 +391,12 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 def get_plumed_dict(metad_sim):
     if  type(metad_sim)==str:
         metad_sim = load(metad_sim)
-    try:
-        nrm = getattr(metad_sim,"nrm")
-    except:
-        nrm = None
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
                                    grid=metad_sim.grid,
                                    interval=metad_sim.interval,
                                     wall_list=metad_sim.wall_list,
-                                   nrm = nrm,
                                    grid_list=metad_sim.grid_list,
                                    interval_list=metad_sim.interval_list,
                                     pace=metad_sim.pace,
