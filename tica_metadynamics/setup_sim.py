@@ -1,10 +1,11 @@
 #!/bin/evn python
 
-import os,shutil
+import os,shutil,
 from .utils import load_yaml_file
 from msmbuilder.utils import load,dump
 from .render_sub_file import slurm_temp
 from .plumed_writer import get_interval, get_plumed_dict
+
 class TicaMetadSim(object):
     def __init__(self, base_dir="./", starting_coordinates_folder="./starting_coordinates",
                             n_tics=1,tica_mdl="tica_mdl.pkl", tica_data="tica_data.pkl",
@@ -14,17 +15,18 @@ class TicaMetadSim(object):
                             nrm = None,
                             grid=False,
                             interval=False,wall=False,
-                            pace=1000, stride=1000,
-                            temp=300, biasfactor=50, height=1.0,
+                            pace=2500, stride=2500,
+                            temp=300, biasfactor=10, height=1.0,
                             sigma=0.2, delete_existing=False, hills_file="HILLS",
                             bias_file="BIAS", label="metad",
                             sim_save_rate=50000,
-                            swap_rate=3000, n_iterations=1000,
+                            swap_rate=25000, n_iterations=1000,
                             platform='CUDA',
                             grid_mlpt_factor=.3,
                             render_scripts=False,
                             msm_swap_folder=None,
-                            msm_swap_scheme='random'):
+                            msm_swap_scheme='random',
+                            n_walkers = 1):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -68,6 +70,7 @@ class TicaMetadSim(object):
         self.platform = platform
         self.grid_list  = self.interval_list = self.wall_list = None
         self.render_scripts = render_scripts
+        self.n_walkers = n_walkers
 
         if self.grid:
             if len(self.grid) < 2:
@@ -88,7 +91,7 @@ class TicaMetadSim(object):
                 raise ValueError("interval must length 2(like [0, 100] for "
                                  "calculating percentiles")
             if len(self.interval)==2 and type(self.interval[0]) in [float,int]:
-               self.interval_list = get_interval(self.tica_data,self.interval[0],self.interval[1])
+               self.interval_list = get_interval(self.tica_data, self.interval[0], self.interval[1])
             else:
                 self.interval_list = self.interval
 
@@ -114,17 +117,37 @@ class TicaMetadSim(object):
         self.swap_rate = swap_rate
         self.plumed_scripts_dict = None
         self.msm_swap_folder = msm_swap_folder
-
         self.msm_swap_scheme = msm_swap_scheme
-        self._setup()
-        print("Dumping model into %s and writing "
-              "submission scripts"%self.base_dir)
 
+
+        if self.n_walkers > 1:
+            print("Multiple walkers found. Modifying current model")
+                            os.chdir(self.base_dir)
+
+            # base_dir, has n_walker folders called walker_0 ... walkers
+            c_base_dir = self.base_dir
+            for w in range(self.n_walkers):
+                os.chdir(c_base_dir)
+                self.base_dir  =os.path.join(self.base_dir,"walker_%d"%j)
+                self.walker_index = w
+                os.chdir(base_dir)
+                self._setup()
+                self._write_scripts_and_dump()
+                # make
+
+        else:
+            self._setup()
+            self._write_scripts_and_dump()
+
+
+
+
+    def _write_scripts_and_dump(self):
         with open(os.path.join(self.base_dir,"sub.sh"),'w') as f:
             f.writelines(slurm_temp.render(job_name="tica_metad",
-                          base_dir=self.base_dir,
-                          partition="pande",
-                          n_tics=self.n_tics))
+                              base_dir=self.base_dir,
+                              partition="pande",
+                              n_tics=self.n_tics))
 
         if self.render_scripts:
             self.plumed_scripts_dict = get_plumed_dict(self)
@@ -133,26 +156,40 @@ class TicaMetadSim(object):
                     f.writelines(self.plumed_scripts_dict[i])
 
         dump(self,"%s/metad_sim.pkl"%self.base_dir)
+        return
 
     def _setup(self):
         c_dir = os.path.abspath(os.path.curdir)
 
         os.chdir(self.base_dir)
         for i in range(self.n_tics):
-            try:
-                os.mkdir("tic_%d"%i)
-            except FileExistsError:
-                if self.delete_existing:
-                    print("Deleting existing tic %d"%i)
-                    shutil.rmtree("tic_%d"%i)
-                    os.mkdir("tic_%d"%i)
-                else:
-                    print("Folder already exists and cant delete")
-                    return #sys.exit()
+            try_except_delete("tic_%d"%i,self.delete_existing)
         os.chdir(c_dir)
         return
 
+    def _setup_walkers_folder(self):
+        # rotuine to setup folder structure
+        # in the main folder
+        os.chdir(self.base_dir)
+        for j in range(self.n_walkers):
+            try_except_delete("walkers_%d"%j, self.delete_existing)
+            for i in range(self.n_tics):
+                try_except_delete("walkers_data_tic_%d"%i, self.delete_existing)
 
+        return
+
+
+def try_except_delete(folder_name, delete_existing=False):
+    try:
+        os.mkdir(folder_name)
+    except FileExistsError:
+        if delete_existing:
+            print("Deleting existing %s"%folder_name)
+            shutil.rmtree(folder_name)
+            os.mkdir(folder_name)
+        else:
+            raise ValueError("Folder already exists and cant delete")
+    return
 
 def parse_commandline():
     parser = argparse.ArgumentParser()

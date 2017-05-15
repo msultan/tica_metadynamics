@@ -16,11 +16,16 @@ plumed_combine_template = Template("COMBINE LABEL={{label}} ARG={{arg}} COEFFICI
 plumed_plain_metad_template = Template("METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
                                        "FILE={{hills}} TEMP={{temp}} PACE={{pace}} LABEL={{label}}")
 
-
 base_metad_script="METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
                     "FILE={{hills}} TEMP={{temp}} PACE={{pace}} LABEL={{label}}"
+
+base_walker_script="WALKERS_N={{walker_n}} WALKERS_ID={{walker_id}} "+\
+                   "WALKERS_DIR={{walker_dir}} WALKERS_RSTRIDE={{walker_stride}}"
+
 bias_factor_format = "BIASFACTOR={{biasfactor}}"
+
 interval_format = "INTERVAL={{interval}}"
+
 grid_format = "GRID_MIN={{GRID_MIN}} GRID_MAX={{GRID_MAX}}"
 
 plumed_wall_template = Template("{{wall_type}}_WALLS ARG={{arg}} AT={{at}} "
@@ -409,10 +414,11 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 def get_plumed_dict(metad_sim):
     if  type(metad_sim)==str:
         metad_sim = load(metad_sim)
-    try:
-        nrm = metad_sim.nrm
-    except:
-        nrm=None
+    if not hasattr(metad_sim,"nrm"):
+        metad_sim.nrm = None
+    if not hasattr(metad_sim,"walker_id"):
+        metad_sim.walker_id = None
+        metad_sim.walker_n = None
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
@@ -426,4 +432,5 @@ def get_plumed_dict(metad_sim):
                                     temp=metad_sim.temp, sigma=metad_sim.sigma,
                                    stride=metad_sim.stride, hills_file=metad_sim.hills_file,
                                    bias_file=metad_sim.bias_file, label=metad_sim.label,
-                                   nrm = nrm)
+                                   nrm = metad_sim.nrm, walker_id = metad_sim.walker_id,
+                                   walker_n=metad_sim.walker_n)

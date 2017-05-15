@@ -66,7 +66,12 @@ class TicaSimulator(object):
         print("Hello from rank %d running tic %d on "
           "host %s with gpu %d"%(self.rank, self.rank,
                                  self.host_name, self.gpu_index))
-
+        # if multi walkers
+        if hasattr(self.metad_sim,"n_walkers") and self.metad_sim.n_walkers > 1:
+            cbd = self.metad_sim.base_dir
+            walker_index = int(os.path.split(cbd)[1].strip("walker_"))
+            print("I am walker %d running tic%d"%(walker_index,self.rank))
+            self.metad_sim.walker_index = walker_index
         self.plumed_force_dict = get_plumed_dict(self.metad_sim)
         self.sim_obj, self.force_group = create_simulation(self.metad_sim.base_dir,
                                                            self.metad_sim.starting_coordinates_folder,
