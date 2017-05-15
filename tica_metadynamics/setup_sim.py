@@ -1,6 +1,6 @@
 #!/bin/evn python
 
-import os,shutil,
+import os,shutil
 from .utils import load_yaml_file
 from msmbuilder.utils import load,dump
 from .render_sub_file import slurm_temp
