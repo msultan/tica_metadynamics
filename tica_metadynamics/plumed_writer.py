@@ -19,9 +19,6 @@ plumed_plain_metad_template = Template("METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT
 base_metad_script="METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
                     "FILE={{hills}} TEMP={{temp}} PACE={{pace}} LABEL={{label}}"
 
-base_walker_script="WALKERS_N={{walker_n}} WALKERS_ID={{walker_id}} "+\
-                   "WALKERS_DIR={{walker_dir}} WALKERS_RSTRIDE={{walker_stride}}"
-
 bias_factor_format = "BIASFACTOR={{biasfactor}}"
 
 interval_format = "INTERVAL={{interval}}"
@@ -262,7 +259,8 @@ def render_tic(df,tica_mdl, tic_index=0):
 
 def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfactor=40,
                       temp=300,interval=None, grid=None,
-                      label="metad",pace=1000,**kwargs):
+                      label="metad",pace=1000, walker_n = None, walker_id=None,
+                      **kwargs):
 
     output=[]
     base_metad_script="METAD ARG={{arg}} SIGMA={{sigma}} HEIGHT={{height}} "+\
@@ -270,14 +268,18 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
     bias_factor_format = "BIASFACTOR={{biasfactor}}"
     interval_format = "INTERVAL={{interval}}"
     grid_format = "GRID_MIN={{grid_min}} GRID_MAX={{grid_max}}"
-
+    walker_format="WALKERS_N={{walker_n}} WALKERS_ID={{walker_id}} "+\
+                   "WALKERS_DIR={{walker_dir}} WALKERS_RSTRIDE={{walker_stride}}"
     if biasfactor is not None:
         base_metad_script = ' '.join((base_metad_script, bias_factor_format))
     if interval is not None:
         base_metad_script = ' '.join((base_metad_script, interval_format))
     if grid is not None:
         base_metad_script = ' '.join((base_metad_script, grid_format))
-
+    if walker_id is not None:
+        base_metad_script = ' '.join((base_metad_script,walker_format))
+        walker_stride = pace
+        walker_dir = "../../data_%d"%arg
     plumed_metad_template = Template(base_metad_script)
 
     plumed_script = plumed_metad_template
@@ -300,7 +302,11 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
                          grid_max=grid_max,
                          label=label,
                          pace=pace,
-                         temp=temp)+"\n")
+                         temp=temp,
+                         walker_id=walker_id,
+                         walker_n=walker_n,
+                         walker_stride=walker_stride,
+                         walker_dir=walker_dir) +"\n")
     return ''.join(output)
 
 
@@ -345,7 +351,8 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                             wall_list=None,nrm=None,
                              pace=1000,  height=1.0, biasfactor=50,
                             temp=300, sigma=0.2, stride=1000, hills_file="HILLS",
-                            bias_file="BIAS", label="metad",**kwargs):
+                            bias_file="BIAS", label="metad",
+                            walker_n=None,walker_id = None,**kwargs):
     """
     Renders a tica plumed dictionary file that can be directly fed in openmm
 
@@ -361,6 +368,8 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
     :param hills_file: hills file
     :param bias_file: bias file
     :param label: metad label
+    :param walker_n : number of walkers per tic
+    :param walker: current walkers id
     :return:
     dictionary keyed on tica indices
     """
@@ -402,7 +411,9 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                                         temp=temp,
                                         interval=interval_list[i],
                                         grid = grid_list[i],
-                                        label=label))
+                                        label=label,
+                                        walker_n=walker_n,
+                                        walker_id=walker_id))
         output.append(render_metad_bias_print(arg="tic%d"%i,
                                              stride=stride,
                                              label=label,

@@ -126,6 +126,7 @@ class TicaMetadSim(object):
 
             # base_dir, has n_walker folders called walker_0 ... walkers
             c_base_dir = self.base_dir
+            self._setup_walkers_folder()
             for w in range(self.n_walkers):
                 os.chdir(c_base_dir)
                 self.base_dir  =os.path.join(self.base_dir,"walker_%d"%j)
@@ -174,7 +175,7 @@ class TicaMetadSim(object):
         for j in range(self.n_walkers):
             try_except_delete("walkers_%d"%j, self.delete_existing)
             for i in range(self.n_tics):
-                try_except_delete("walkers_data_tic_%d"%i, self.delete_existing)
+                try_except_delete("data_tic%d"%i, self.delete_existing)
 
         return
 
