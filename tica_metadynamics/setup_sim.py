@@ -70,7 +70,7 @@ class TicaMetadSim(object):
         self.platform = platform
         self.grid_list  = self.interval_list = self.wall_list = None
         self.render_scripts = render_scripts
-        self.n_walkers = n_walkers
+        self.walker_n = n_walkers
 
         if self.grid:
             if len(self.grid) < 2:
@@ -120,17 +120,16 @@ class TicaMetadSim(object):
         self.msm_swap_scheme = msm_swap_scheme
 
 
-        if self.n_walkers > 1:
+        if self.walker_n > 1:
             print("Multiple walkers found. Modifying current model")
-                            os.chdir(self.base_dir)
-
+            os.chdir(self.base_dir)
             # base_dir, has n_walker folders called walker_0 ... walkers
             c_base_dir = self.base_dir
             self._setup_walkers_folder()
-            for w in range(self.n_walkers):
+            for w in range(self.walker_n):
                 os.chdir(c_base_dir)
-                self.base_dir  =os.path.join(self.base_dir,"walker_%d"%j)
-                self.walker_index = w
+                self.base_dir  =os.path.join(c_base_dir,"walker_%d"%w)
+                self.walker_id = w
                 os.chdir(base_dir)
                 self._setup()
                 self._write_scripts_and_dump()
@@ -172,10 +171,10 @@ class TicaMetadSim(object):
         # rotuine to setup folder structure
         # in the main folder
         os.chdir(self.base_dir)
-        for j in range(self.n_walkers):
-            try_except_delete("walkers_%d"%j, self.delete_existing)
-            for i in range(self.n_tics):
-                try_except_delete("data_tic%d"%i, self.delete_existing)
+        for j in range(self.walker_n):
+            try_except_delete("walker_%d"%j, self.delete_existing)
+        for i in range(self.n_tics):
+            try_except_delete("data_tic%d"%i, self.delete_existing)
 
         return
 

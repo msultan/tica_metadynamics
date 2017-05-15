@@ -278,8 +278,10 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
         base_metad_script = ' '.join((base_metad_script, grid_format))
     if walker_id is not None:
         base_metad_script = ' '.join((base_metad_script,walker_format))
-        walker_stride = pace
-        walker_dir = "../../data_%d"%arg
+        walker_stride = pace * 10
+        walker_dir = "../../data_%s"%arg
+    else:
+        walker_stride=walker_dir=None
     plumed_metad_template = Template(base_metad_script)
 
     plumed_script = plumed_metad_template
