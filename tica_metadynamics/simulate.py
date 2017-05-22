@@ -75,7 +75,7 @@ class TicaSimulator(object):
         self.plumed_force_dict = get_plumed_dict(self.metad_sim)
 
         # last replica is the neutral replica
-        if self.metad_sim.neutral_replica and self.rank==self.size:
+        if self.metad_sim.neutral_replica and self.rank==self.size-1:
             from tica_metadynamics.load_sim import create_neutral_simulation
             self.sim_obj = create_neutral_simulation(self.metad_sim.base_dir,
                                                      self.metad_sim.starting_coordinates_folder,
@@ -138,7 +138,7 @@ class TicaSimulator(object):
 
 
     def get_energy(self):
-        if self.metad_sim.neutral_replica and self.rank==self.size:
+        if self.metad_sim.neutral_replica and self.rank==self.size-1:
             return 0
         else:
             return self.sim_obj.context.getState(getEnergy=True,groups={self.force_group}).\
@@ -219,7 +219,7 @@ class TicaSimulator(object):
         return
 
     def mix_with_msm(self):
-        if self.metad_sim.neutral_replica and self.rank==self.size:
+        if self.metad_sim.neutral_replica and self.rank==self.size-1:
             return
         if self.metad_sim.msm_swap_scheme=='random':
             flist = self.full_list

@@ -15,7 +15,7 @@ def load_sim_files(starting_dir):
 
     return state, system,integrator, pdb
 
-def get_platform(platform):
+def get_platform(platform,gpu_index=0):
     if platform=='CPU':
         platform = Platform.getPlatformByName("CPU")
         properties =dict()
@@ -41,7 +41,7 @@ def create_simulation(base_dir, starting_dir,
     new_f.setForceGroup(force_group)
     system.addForce(new_f)
 
-    platform, proerties = get_platform(platform)
+    platform, properties = get_platform(platform,gpu_index)
     simulation = app.Simulation(pdb.topology, system, integrator, platform, properties)
 
     if os.path.isfile("./checkpt.chk"):
@@ -64,10 +64,10 @@ def create_neutral_simulation(base_dir, starting_dir,
                               gpu_index,
                               sim_save_rate,
                               platform):
-    print("Creating simulation for neutral_walker")
-    os.chdir((os.path.join(base_dir,"neutral_walker")))
+    print("Creating simulation for neutral_replica")
+    os.chdir((os.path.join(base_dir,"neutral_replica")))
     state, system, integrator, pdb = load_sim_files(starting_dir)
-    platform, proerties = get_platform(platform)
+    platform, properties = get_platform(platform,gpu_index)
     simulation = app.Simulation(pdb.topology, system, integrator,
                                 platform, properties)
 
@@ -76,7 +76,7 @@ def create_neutral_simulation(base_dir, starting_dir,
             simulation.context.loadCheckpoint(f.read())
     else:
         simulation.context.setState(state)
-    print("Done creating simulation neutral_walker")
+    print("Done creating simulation neutral_replica")
 
     f = open("./speed_report.txt",'w')
     backup("trajectory.dcd")
