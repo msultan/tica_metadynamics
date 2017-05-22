@@ -73,7 +73,17 @@ class TicaSimulator(object):
             print("I am walker %d running tic%d"%(walker_index,self.rank))
             self.metad_sim.walker_index = walker_index
         self.plumed_force_dict = get_plumed_dict(self.metad_sim)
-        self.sim_obj, self.force_group = create_simulation(self.metad_sim.base_dir,
+
+        # last replica is the neutral replica
+        if self.metad_sim.neutral_replica and self.rank==self.size:
+            from tica_metadynamics.load_sim import create_neutral_simulation
+            self.sim_obj = create_neutral_simulation(self.metad_sim.base_dir,
+                                                     self.metad_sim.starting_coordinates_folder,
+                                                     self.gpu_index,
+                                                     self.metad_sim.sim_save_rate,
+                                                     self.metad_sim.platform)
+        else:
+            self.sim_obj, self.force_group = create_simulation(self.metad_sim.base_dir,
                                                            self.metad_sim.starting_coordinates_folder,
                                                            self.gpu_index,
                                                            self.rank,
@@ -120,16 +130,22 @@ class TicaSimulator(object):
             current_sim_time = self.sim_obj.context.getState().getTime()
             if self.metad_sim.msm_swap_folder is not None:
                 self.mix_with_msm()
-
             self.mix_all_replicas()
             comm.barrier()
             self.sim_obj.context.setTime(current_sim_time)
         if self.rank==0 and self.size >1:
             self.log_file.close()
 
+
+    def get_energy(self):
+        if self.metad_sim.neutral_replica and self.rank==self.size:
+            return 0
+        else:
+            return self.sim_obj.context.getState(getEnergy=True,groups={self.force_group}).\
+                getPotentialEnergy().value_in_unit(kilojoule_per_mole)
+
     def mix_all_replicas(self):
-        old_energy = self.sim_obj.context.getState(getEnergy=True,groups={self.force_group}).\
-            getPotentialEnergy().value_in_unit(kilojoule_per_mole)
+        old_energy = self.get_energy()
         #write the chckpt
         with open("checkpt.chk",'wb') as f:
             f.write(self.sim_obj.context.createCheckpoint())
@@ -155,8 +171,7 @@ class TicaSimulator(object):
                 self.sim_obj.context.loadCheckpoint(f.read())
 
             # return new state and new energies
-            new_energy = self.sim_obj.context.getState(getEnergy=True,groups={self.force_group}).\
-                getPotentialEnergy().value_in_unit(kilojoule_per_mole)
+            new_energy = self.get_energy()
             data = comm.gather((new_state,new_energy), root=0)
 
             if rank==0:
@@ -204,6 +219,8 @@ class TicaSimulator(object):
         return
 
     def mix_with_msm(self):
+        if self.metad_sim.neutral_replica and self.rank==self.size:
+            return
         if self.metad_sim.msm_swap_scheme=='random':
             flist = self.full_list
         elif self.metad_sim.msm_swap_scheme == 'swap_once':

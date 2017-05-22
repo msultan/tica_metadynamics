@@ -26,7 +26,8 @@ class TicaMetadSim(object):
                             render_scripts=False,
                             msm_swap_folder=None,
                             msm_swap_scheme='random',
-                            n_walkers = 1):
+                            n_walkers = 1,
+                            neutral_replica=False):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -118,7 +119,7 @@ class TicaMetadSim(object):
         self.plumed_scripts_dict = None
         self.msm_swap_folder = msm_swap_folder
         self.msm_swap_scheme = msm_swap_scheme
-
+        self.neutral_replica = neutral_replica
 
         if self.walker_n > 1:
             print("Multiple walkers found. Modifying current model")
@@ -143,11 +144,14 @@ class TicaMetadSim(object):
 
 
     def _write_scripts_and_dump(self):
+        n_gpus = self.n_tics
+        if self.neutral_replica:
+            n_gpus += 1
         with open(os.path.join(self.base_dir,"sub.sh"),'w') as f:
             f.writelines(slurm_temp.render(job_name="tica_metad",
                               base_dir=self.base_dir,
                               partition="pande",
-                              n_tics=self.n_tics))
+                              n_tics=n_gpus))
 
         if self.render_scripts:
             self.plumed_scripts_dict = get_plumed_dict(self)
@@ -164,6 +168,8 @@ class TicaMetadSim(object):
         os.chdir(self.base_dir)
         for i in range(self.n_tics):
             try_except_delete("tic_%d"%i,self.delete_existing)
+        if self.neutral_replica:
+            try_except_delete("neutral_replica",self.delete_existing)
         os.chdir(c_dir)
         return
 
