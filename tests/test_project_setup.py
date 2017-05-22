@@ -17,7 +17,8 @@ def test_setup():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir,tica_data=tica_data, tica_mdl=tica_mdl,
                      data_frame=df, grid=False, interval=False,wall=False,
-                     render_scripts=True)
+                     render_scripts=True,
+                    delete_existing=True)
 
         metad_sim = load("./metad_sim.pkl")
 
@@ -34,7 +35,8 @@ def test_delete():
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir, tica_data=tica_data,tica_mdl=tica_mdl,
-                     data_frame=df, grid=False, interval=False,render_scripts=True)
+                     data_frame=df, grid=False, interval=False,render_scripts=True,
+		    delete_existing=True)
 
 
         f = open("tic_0/rand.txt",'w')

@@ -194,7 +194,8 @@ def try_except_delete(folder_name, delete_existing=False):
             shutil.rmtree(folder_name)
             os.mkdir(folder_name)
         else:
-            raise ValueError("Folder already exists and cant delete")
+            print("Folder already exists and cant delete")
+            return
     return
 
 def parse_commandline():
