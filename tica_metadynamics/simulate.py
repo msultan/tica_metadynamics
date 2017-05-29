@@ -128,13 +128,11 @@ class TicaSimulator(object):
             self.step = step
             self.sim_obj.step(self.metad_sim.swap_rate)
             current_sim_time = self.sim_obj.context.getState().getTime()
-            current_velocities = self.sim_obj.context.getState(getVelocities=True).getVelocities()
             if self.metad_sim.msm_swap_folder is not None:
                 self.mix_with_msm()
             self.mix_all_replicas()
             comm.barrier()
             self.sim_obj.context.setTime(current_sim_time)
-            self.sim_obj.context.setVelocities(current_velocities)
         if self.rank==0 and self.size >1:
             self.log_file.close()
 
