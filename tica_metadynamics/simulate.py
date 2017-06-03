@@ -103,7 +103,7 @@ class TicaSimulator(object):
             pass
         elif self.metad_sim.msm_swap_scheme == 'swap_once':
             self._tabu_list=[]
-        elif self.metad_sim.msm_swap_scheme in ['tabu_list','min_count']:
+        elif self.metad_sim.msm_swap_scheme in ['tabu_list','min_count','wt_msm']:
             self.featurizer = self.metad_sim.featurizer
             self.tica_mdl = self.metad_sim.tica_mdl
             self.kmeans_mdl  = self.metad_sim.kmeans_mdl
@@ -116,7 +116,10 @@ class TicaSimulator(object):
                                                             self.tica_mdl.transform(
                                                                 self.featurizer.transform([self.top])
                                                             ))[0][0]
-                print(i,self.known_msm_states[i])
+                print(i, self.known_msm_states[i])
+            if self.metad_sim.msm_swap_scheme=='wt_msm':
+                self.wt_msm_mdl = self.metad_sim.wt_msm_mdl
+
         else:
             raise ValueError("MSM swap scheme is invalid")
 
@@ -246,10 +249,33 @@ class TicaSimulator(object):
                          if self.known_msm_states[fname]==bin_index]
                     if len(flist)>0:
                         break
+        elif self.metad_sim.msm_swap_scheme == 'wt_msm':
+            current_state = self.sim_obj.context.getState(getPositions=True)
+            self.top.xyz = np.array(current_state.getPositions()/nanometer)
+
+            if self.nrm is not None:
+                self.msm_state = self.wt_msm_mdl.transform(self.kmeans_mdl.transform(
+                                                            self.tica_mdl.transform(
+                                                                [self.nrm.transfrom(
+                                                                    self.featurizer.transform([self.top])[0])]
+                                                            )))[0][0]
+            else:
+                self.msm_state = self.wt_msm_mdl.transform(self.kmeans_mdl.transform(
+                                                            self.tica_mdl.transform(
+                                                                self.featurizer.transform([self.top])
+                                                            )))[0][0]
+            #get states you are most likely to transition to
+            next_likely_state = np.random.choice(range(self.wt_msm_mdl.n_states_),
+                                                  size=1,
+                                                  p=self.wt_msm_mdl.transmat_[self.msm_state,:])[0]
+            flist = [fname for fname in self.known_msm_states.keys()
+                     if self.wt_msm_mdl.transform([self.known_msm_states[fname]])[0] == next_likely_state]
+            print(self.msm_state, self.next_likely_state, self.flist)
+
         else:
             raise ValueError("Sorry that MSM sampler is not implemented")
-        if len(flist)==0 and self.metad_sim.msm_swap_scheme in ["swap_once", "tabu_list"]:
-            print("Already done all possible MSM swaps. Returning")
+        if len(flist)==0 and self.metad_sim.msm_swap_scheme in ["swap_once", "tabu_list","wt_msm"]:
+            print("Already done all possible MSM swaps or state not found. Returning")
             return
         print("Found %d states"%len(flist), flush=True)
         random_chck = np.random.choice(flist)

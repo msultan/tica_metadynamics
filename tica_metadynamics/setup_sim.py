@@ -13,6 +13,7 @@ class TicaMetadSim(object):
                             featurizer=None,
                             kmeans_mdl =None,
                             nrm = None,
+                            wt_msm_mdl=None,
                             grid=False,
                             interval=False,wall=False,
                             pace=2500, stride=2500,
@@ -61,6 +62,11 @@ class TicaMetadSim(object):
             self.nrm = load(nrm)
         else:
             self.nrm = nrm
+
+        if type(wt_msm_mdl)==str:
+            self.wt_msm_mdl = load(wt_msm_mdl)
+        else:
+            self.wt_msm_mdl = wt_msm_mdl
 
         self.grid = grid
         self.grid_mlpt_factor = grid_mlpt_factor
