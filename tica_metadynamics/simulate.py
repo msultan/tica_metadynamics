@@ -107,12 +107,20 @@ class TicaSimulator(object):
             self.featurizer = self.metad_sim.featurizer
             self.tica_mdl = self.metad_sim.tica_mdl
             self.kmeans_mdl  = self.metad_sim.kmeans_mdl
+            self.nrm = self.metad_sim.nrm
             self.top = md.load(os.path.join(self.metad_sim.starting_coordinates_folder,"0.pdb"))
             self.known_msm_states = {}
             for i in self.full_list:
                 state = XmlSerializer.deserialize(open(i).read())
                 self.top.xyz=np.array(state.getPositions()/nanometer)
-                self.known_msm_states[i] = self.kmeans_mdl.transform(
+                if self.nrm is not None:
+                    self.known_msm_states[i] = self.kmeans_mdl.transform(
+                                                            self.tica_mdl.transform(
+                                                                [self.nrm.transform(
+                                                                    self.featurizer.transform([self.top])[0])]
+                                                            ))[0][0]
+                else:
+                    self.known_msm_states[i] = self.kmeans_mdl.transform(
                                                             self.tica_mdl.transform(
                                                                 self.featurizer.transform([self.top])
                                                             ))[0][0]
@@ -256,7 +264,7 @@ class TicaSimulator(object):
             if self.nrm is not None:
                 self.msm_state = self.wt_msm_mdl.transform(self.kmeans_mdl.transform(
                                                             self.tica_mdl.transform(
-                                                                [self.nrm.transfrom(
+                                                                [self.nrm.transform(
                                                                     self.featurizer.transform([self.top])[0])]
                                                             )))[0][0]
             else:
@@ -270,7 +278,7 @@ class TicaSimulator(object):
                                                   p=self.wt_msm_mdl.transmat_[self.msm_state,:])[0]
             flist = [fname for fname in self.known_msm_states.keys()
                      if self.wt_msm_mdl.transform([self.known_msm_states[fname]])[0] == next_likely_state]
-            print(self.msm_state, self.next_likely_state, self.flist)
+            print(self.msm_state, next_likely_state, flist)
 
         else:
             raise ValueError("Sorry that MSM sampler is not implemented")
