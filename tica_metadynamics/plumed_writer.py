@@ -240,9 +240,9 @@ def render_tic(df,tica_mdl, tic_index=0):
     else:
         feat_labels = ['_'.join(map(str,i)) for i in df.resids[inds]]
     feature_labels = [template.render(func=i,feature_group=j,feature_index=k) \
-                      for i,j,k in zip(func[inds],df.featuregroup[inds],feat_labels)]
+                      for i,j,k in zip(func,df.featuregroup[inds],feat_labels)]
 
-    tic_coefficient = tica_mdl.components_[tic_index,]
+    tic_coefficient = tica_mdl.components_[tic_index,inds]
     if tica_mdl.kinetic_mapping:
         raise ValueError("Sorry but kinetic mapping or is not supported for now")
         #tic_coefficient *= tica_mdl.eigenvalues_[tic_index]
