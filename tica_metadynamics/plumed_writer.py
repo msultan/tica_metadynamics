@@ -386,6 +386,46 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         grid_list = np.repeat(None,n_tics)
     if interval_list is None:
         interval_list = np.repeat(None, n_tics)
+
+    if type(multiple_tics) == int:
+        print("Running Multiple tics per simulation. Going up to tic index %d"%n_tics)
+        inds = np.unique(np.nonzero(tica_mdl.components_[:multiple_tics,:])[1])
+        raw_feats = render_raw_features(df, inds)
+        mean_feats = render_mean_free_features(df, inds, tica_mdl, nrm)
+        output.append(raw_feats)
+        output.append(mean_feats)
+        for i in range(multiple_tics):
+            output.append(render_tic(df,tica_mdl,i))
+
+        tic_arg_list = ','.join(["tic%d"%i for i in range(multiple_tics)])
+        grid_min = ','.join([grid_list[i][0] for i in range(multiple_tics)])
+        grid_max = ','.join([grid_list[i][1] for i in range(multiple_tics)])
+        current_grid_list = [grid_min, grid_max]
+
+        interval_min = ','.join([interval_list[i][0] for i in range(multiple_tics)])
+        interval_max = ','.join([interval_list[i][1] for i in range(multiple_tics)])
+        current_interval_list = [interval_min, interval_max]
+        output.append(render_metad_code(arg=tic_arg_list,
+                                        sigma=sigma,
+                                        height=height,
+                                        hills=hills_file,
+                                        biasfactor=biasfactor,
+                                        pace=pace,
+                                        temp=temp,
+                                        interval=current_interval_list,
+                                        grid = current_grid_list,
+                                        label=label,
+                                        walker_n=walker_n,
+                                        walker_id=walker_id))
+        output.append(render_metad_bias_print(arg=tic_arg_list,
+                                             stride=stride,
+                                             label=label,
+                                             file=bias_file))
+
+        return_dict[0] = str(''.join(output))
+
+        return return_dict
+
     for i in range(n_tics):
         output=[]
         output.append("RESTART\n")
@@ -435,6 +475,8 @@ def get_plumed_dict(metad_sim):
     if not hasattr(metad_sim,"walker_id"):
         metad_sim.walker_id = None
         metad_sim.walker_n = None
+    if not hasattr(metad_sim, "multiple_tics"):
+        metad_sim.multiple_tics = None
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
@@ -449,4 +491,5 @@ def get_plumed_dict(metad_sim):
                                    stride=metad_sim.stride, hills_file=metad_sim.hills_file,
                                    bias_file=metad_sim.bias_file, label=metad_sim.label,
                                    nrm = metad_sim.nrm, walker_id = metad_sim.walker_id,
-                                   walker_n=metad_sim.walker_n)
+                                   walker_n=metad_sim.walker_n,
+                                   multiple_tics=metad_sim.multiple_tics)
