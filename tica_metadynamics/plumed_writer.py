@@ -378,9 +378,9 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 
     return_dict = {}
 
-    inds = np.arange(tica_mdl.n_features)
-    raw_feats = render_raw_features(df,inds)
-    mean_feats = render_mean_free_features(df,inds,tica_mdl,nrm)
+    # inds = np.arange(tica_mdl.n_features)
+    # raw_feats = render_raw_features(df,inds)
+    # mean_feats = render_mean_free_features(df,inds,tica_mdl,nrm)
 
     if grid_list is None:
         grid_list = np.repeat(None,n_tics)
@@ -389,6 +389,9 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
     for i in range(n_tics):
         output=[]
         output.append("RESTART\n")
+        inds = np.nonzero(tica_mdl.components_[i,:])[0]
+        raw_feats = render_raw_features(df, inds)
+        mean_feats = render_mean_free_features(df, inds, tica_mdl, nrm)
         output.append(raw_feats)
         output.append(mean_feats)
         output.append(render_tic(df,tica_mdl,i))
