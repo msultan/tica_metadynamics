@@ -403,9 +403,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         grid_max = ','.join([str(grid_list[i][1]) for i in range(multiple_tics)])
         current_grid_list = [grid_min, grid_max]
         print(current_grid_list)
-        interval_min = ','.join([str(interval_list[i][0]) for i in range(multiple_tics)])
-        interval_max = ','.join([str(interval_list[i][1]) for i in range(multiple_tics)])
-        current_interval_list = [interval_min, interval_max]
+        current_interval_list = None
         print(current_interval_list)
         output.append(render_metad_code(arg=tic_arg_list,
                                         sigma=sigma,
