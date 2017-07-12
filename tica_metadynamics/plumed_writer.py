@@ -388,6 +388,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         interval_list = np.repeat(None, n_tics)
     multiple_tics = kwargs.pop('multiple_tics')
     if type(multiple_tics) == int:
+        output = []
         print("Running Multiple tics per simulation. Going up to tic index %d"%n_tics)
         inds = np.unique(np.nonzero(tica_mdl.components_[:multiple_tics,:])[1])
         raw_feats = render_raw_features(df, inds)
