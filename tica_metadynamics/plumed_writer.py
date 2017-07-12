@@ -399,13 +399,14 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
             output.append(render_tic(df,tica_mdl,i))
 
         tic_arg_list = ','.join(["tic%d"%i for i in range(multiple_tics)])
-        grid_min = ','.join([grid_list[i][0] for i in range(multiple_tics)])
-        grid_max = ','.join([grid_list[i][1] for i in range(multiple_tics)])
+        grid_min = ','.join([str(grid_list[i][0]) for i in range(multiple_tics)])
+        grid_max = ','.join([str(grid_list[i][1]) for i in range(multiple_tics)])
         current_grid_list = [grid_min, grid_max]
-
-        interval_min = ','.join([interval_list[i][0] for i in range(multiple_tics)])
-        interval_max = ','.join([interval_list[i][1] for i in range(multiple_tics)])
+        print(current_grid_list)
+        interval_min = ','.join([str(interval_list[i][0]) for i in range(multiple_tics)])
+        interval_max = ','.join([str(interval_list[i][1]) for i in range(multiple_tics)])
         current_interval_list = [interval_min, interval_max]
+        print(current_interval_list)
         output.append(render_metad_code(arg=tic_arg_list,
                                         sigma=sigma,
                                         height=height,
