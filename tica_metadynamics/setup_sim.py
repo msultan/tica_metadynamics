@@ -147,6 +147,7 @@ class TicaMetadSim(object):
             self._setup()
             self._write_scripts_and_dump()
 
+        self.tica_data = None
 
 
 
