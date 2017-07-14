@@ -127,6 +127,7 @@ class TicaMetadSim(object):
         self.msm_swap_folder = msm_swap_folder
         self.msm_swap_scheme = msm_swap_scheme
         self.neutral_replica = neutral_replica
+        self.tica_data = None
 
         if self.walker_n > 1:
             print("Multiple walkers found. Modifying current model")
@@ -146,9 +147,6 @@ class TicaMetadSim(object):
         else:
             self._setup()
             self._write_scripts_and_dump()
-
-        self.tica_data = None
-
 
 
     def _write_scripts_and_dump(self):
