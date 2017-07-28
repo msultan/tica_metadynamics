@@ -5,6 +5,7 @@ import numpy as np
 
 plumed_dist_template = Template("DISTANCE ATOMS={{atoms}} LABEL={{label}} ")
 plumed_torsion_template = Template("TORSION ATOMS={{atoms}} LABEL={{label}} ")
+plumed_angle_template = Template("ANGLE ATOMS={{atoms}} LABEL={{label}} ")
 plumed_rmsd_template = Template("RMSD REFERENCE={{loc}} TYPE=OPTIMAL LABEL={{label}} ")
 plumed_min_dist_template = Template("DISTANCES GROUPA={{group_a}} GROUPB={{group_b}} MIN={BETA={{beta}}} LABEL={{label}}")
 
@@ -30,12 +31,16 @@ plumed_wall_template = Template("{{wall_type}}_WALLS ARG={{arg}} AT={{at}} "
 
 plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{file}} ")
 
-_SUPPORTED_FEATS=["Contact","LandMarkFeaturizer","Dihedral","AlphaAngle"]
+_SUPPORTED_FEATS=["Contact","LandMarkFeaturizer","Dihedral","AlphaAngle", "Kappa"]
 
 
 def create_torsion_label(inds, label):
     #t: TORSION ATOMS=inds
     return plumed_torsion_template.render(atoms=','.join(map(str, inds)), label=label) +"\n"
+
+def create_angle_label(inds, label):
+    #t: ANGLE ATOMS=inds
+    return plumed_angle_template.render(atoms=','.join(map(str, inds)), label=label) +"\n"
 
 def create_distance_label(inds, label):
     return plumed_dist_template.render(atoms=','.join(map(str, inds)), label=label) + "\n"
@@ -138,6 +143,8 @@ def get_feature_function(df, feature_index):
         func = possibles.get("create_min_dist_label")
     elif df.featurizer[feature_index] == "LandMarkFeaturizer":
         func = possibles.get("create_rmsd_label")
+    elif df.featurizer[feature_index] == "Kappa":
+        func = possibles.get("create_angle_label")
     else:
         func = possibles.get("create_torsion_label")
     return func
