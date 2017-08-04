@@ -221,6 +221,8 @@ def render_mean_free_features(df, inds, tica_mdl, nrm=None):
             feat_label = feat+"_%s"%'_'.join(map(str,resids))
         sigma = None
         if nrm is not None:
+            if hasattr(nrm, "center_"):
+                nrm.mean_ = nrm.center_
             output.append(create_mean_free_label(feature_label=feat_label,\
                                              offset=tica_mdl.means_[feature_index],\
                                              func =func, \
