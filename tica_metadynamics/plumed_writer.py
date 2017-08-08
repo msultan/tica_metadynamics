@@ -174,8 +174,8 @@ def render_raw_features(df,inds):
             if  df.featurizer[feature_index] == "LandMarkFeaturizer":
                 output.append(func("../pdbs/%d.pdb"%feature_index , feat_label))
             elif  df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])==1:
-                output.append(func(inds=[np.array(atominds[0])+1,
-                                         np.array(atominds[1])+1],
+                output.append(func(inds=[np.array(atominds[0][0])+1,
+                                         np.array(atominds[1][0])+1],
                                    label=feat_label))
             elif  df.featurizer[feature_index] == "Contact" and len(df.atominds[feature_index][0])>1:
                 output.append(func(group_a=np.array(atominds[0])+1,
