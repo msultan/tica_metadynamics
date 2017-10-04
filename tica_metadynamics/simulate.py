@@ -72,7 +72,11 @@ class TicaSimulator(object):
             walker_index = int(os.path.split(cbd)[1].strip("walker_"))
             print("I am walker %d running tic%d"%(walker_index,self.rank))
             self.metad_sim.walker_index = walker_index
-        self.plumed_force_dict = get_plumed_dict(self.metad_sim)
+
+        if self.metad_sim.plumed_dict is not None:
+            self.plumed_force_dict = self.metad_sim.plumed_dict
+        else:
+            self.plumed_force_dict = get_plumed_dict(self.metad_sim)
 
         # last replica is the neutral replica
         if self.metad_sim.neutral_replica and self.rank==self.size-1:
