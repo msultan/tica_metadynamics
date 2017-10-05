@@ -73,8 +73,9 @@ class TicaSimulator(object):
             print("I am walker %d running tic%d"%(walker_index,self.rank))
             self.metad_sim.walker_index = walker_index
 
-        if self.metad_sim.plumed_dict is not None:
-            self.plumed_force_dict = self.metad_sim.plumed_dict
+        if self.metad_sim.plumed_script is not None:
+            #self.plumed_force_dict = self.metad_sim.plumed_dict
+            self.plumed_force_dict = {0: self.metad_sim.plumed_script}
         else:
             self.plumed_force_dict = get_plumed_dict(self.metad_sim)
 
