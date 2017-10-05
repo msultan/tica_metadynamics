@@ -164,7 +164,7 @@ class TicaMetadSim(object):
         with open(os.path.join(self.base_dir,"sub.sh"),'w') as f:
             f.writelines(slurm_temp.render(job_name="tica_metad",
                               base_dir=self.base_dir,
-                              partition="pande",
+                              partition="pande,normal,gpu,hns_gpu",
                               n_tics=n_gpus))
 
         if self.render_scripts:
