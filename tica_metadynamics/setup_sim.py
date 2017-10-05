@@ -29,7 +29,8 @@ class TicaMetadSim(object):
                             msm_swap_scheme='random',
                             n_walkers = 1,
                             neutral_replica=False,
-                            multiple_tics=False):
+                            multiple_tics=False,
+                            plumed_dict=None):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -68,6 +69,13 @@ class TicaMetadSim(object):
             self.wt_msm_mdl = load(wt_msm_mdl)
         else:
             self.wt_msm_mdl = wt_msm_mdl
+	# load plumed file
+
+        if type(plumed_dict)==str:
+            self.plumed_dict=load(plumed_dict)
+            self.n_tics = len(list(self.plumed_dict.keys()))
+        else:
+            self.plumed_dict=None
 
         self.grid = grid
         self.grid_mlpt_factor = grid_mlpt_factor
@@ -160,7 +168,10 @@ class TicaMetadSim(object):
                               n_tics=n_gpus))
 
         if self.render_scripts:
-            self.plumed_scripts_dict = get_plumed_dict(self)
+            if self.plumed_dict is not None:
+                self.plumed_scripts_dict = self.plumed_dict
+            else:
+                self.plumed_scripts_dict = get_plumed_dict(self)
             for i in range(self.n_tics):
                 with open("%s/tic_%d/plumed.dat"%(self.base_dir,i),'w') as f:
                     f.writelines(self.plumed_scripts_dict[i])
