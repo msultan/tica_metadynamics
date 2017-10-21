@@ -31,7 +31,7 @@ plumed_wall_template = Template("{{wall_type}}_WALLS ARG={{arg}} AT={{at}} "
 
 plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{file}} ")
 
-_SUPPORTED_FEATS=["Contact","LandMarkFeaturizer","Dihedral","AlphaAngle", "Kappa"]
+_SUPPORTED_FEATS=["Contact","LandMarkFeaturizer","Dihedral","AlphaAngle","Angle" "Kappa"]
 
 
 def create_torsion_label(inds, label):
