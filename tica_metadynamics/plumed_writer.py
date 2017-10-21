@@ -143,7 +143,7 @@ def get_feature_function(df, feature_index):
         func = possibles.get("create_min_dist_label")
     elif df.featurizer[feature_index] == "LandMarkFeaturizer":
         func = possibles.get("create_rmsd_label")
-    elif df.featurizer[feature_index] == "Kappa":
+    elif df.featurizer[feature_index] in ["Kappa","Angle"]:
         func = possibles.get("create_angle_label")
     else:
         func = possibles.get("create_torsion_label")
