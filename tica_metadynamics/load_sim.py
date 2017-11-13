@@ -79,7 +79,7 @@ def create_neutral_simulation(base_dir, starting_dir,
     print("Done creating simulation neutral_replica")
 
     f = open("./speed_report.txt",'w')
-    backup("trajectory.dcd")
+    backup("trajectory.dcd")    
     simulation.reporters.append(app.DCDReporter('trajectory.dcd', sim_save_rate))
     simulation.reporters.append(app.StateDataReporter(f, 1000, step=True,\
                                 potentialEnergy=True, temperature=True, progress=True, remainingTime=True,\
