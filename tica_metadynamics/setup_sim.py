@@ -171,7 +171,7 @@ class TicaMetadSim(object):
         if self.render_scripts:
             if self.plumed_script is not None:
                 #self.plumed_scripts_dict = self.plumed_dict
-                self.plumed_scripts_dict = {0: string}
+                self.plumed_scripts_dict = {0: self.plumed_script}
             else:
                 self.plumed_scripts_dict = get_plumed_dict(self)
             for i in range(self.n_tics):
