@@ -6,6 +6,8 @@ plumed_matheval_template = Template("MATHEVAL ARG={{arg}} FUNC={{func}} LABEL={{
 
 plumed_combine_template = Template("COMBINE LABEL={{label}} ARG={{arg}} COEFFICIENTS={{coefficients}} "+\
                                     "PERIODIC={{periodic}} ")
+plumed_wall_template = Template("{{wall_type}}_WALLS ARG={{arg}} AT={{at}} "
+                         "KAPPA={{kappa}} EXP={{exp}} EPS={{eps}} OFFSET={{offset}} LABEL={{label}}")
 
 
 

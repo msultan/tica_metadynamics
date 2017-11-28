@@ -5,6 +5,7 @@ from tica_metadynamics.setup_sim import TicaMetadSim
 from mdtraj.utils import enter_temp_directory
 from numpy.testing.decorators import skipif
 from tica_metadynamics.simulate import run_meta_sim
+import pandas as pd
 try: 
     import openmmplumed
 except:
@@ -17,7 +18,7 @@ else:
 @skipif('openmmplumed' not in sys.modules, 'Need openmmplumed force for this')
 def _test_plumed_run():
     tica_mdl = load(os.path.join(base_dir,"dihedral_mdl/tica_mdl.pkl"))
-    df = load(os.path.join(base_dir,"./dihedral_mdl/feature_descriptor.pkl"))
+    df = pd.read_pickle(os.path.join(base_dir,"./dihedral_mdl/feature_descriptor.pkl"))
     starting_coordinates_folder = os.path.join(base_dir,"starting_coordinates")
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)

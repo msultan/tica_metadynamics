@@ -4,15 +4,17 @@ from msmbuilder.utils import load
 from tica_metadynamics.setup_sim import TicaMetadSim
 from mdtraj.utils import enter_temp_directory
 from mdtraj.testing import eq
+import pandas as pd
+
 if os.path.isdir("tests"):
     base_dir = os.path.abspath(os.path.join("./tests/test_data"))
 else:
     base_dir = os.path.abspath(os.path.join("./test_data"))
 
 def test_setup():
-    tica_mdl = load(os.path.join(base_dir,"landmark_mdl/tica_mdl.pkl"))
-    tica_data = load(os.path.join(base_dir,"landmark_mdl/tica_features.pkl"))
-    df = load(os.path.join(base_dir,"./landmark_mdl/feature_descriptor.pkl"))
+    tica_mdl = load(os.path.join(base_dir,"dihedral_mdl/tica_mdl.pkl"))
+    tica_data = load(os.path.join(base_dir,"dihedral_mdl/tica_features.pkl"))
+    df = pd.read_pickle(os.path.join(base_dir,"./dihedral_mdl/feature_descriptor.pkl"))
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir,tica_data=tica_data, tica_mdl=tica_mdl,
@@ -29,9 +31,9 @@ def test_setup():
         assert os.path.isfile("sub.sh")
 
 def test_delete():
-    tica_mdl = load(os.path.join(base_dir,"landmark_mdl/tica_mdl.pkl"))
-    tica_data = load(os.path.join(base_dir,"landmark_mdl/tica_features.pkl"))
-    df = load(os.path.join(base_dir,"./landmark_mdl/feature_descriptor.pkl"))
+    tica_mdl = load(os.path.join(base_dir,"dihedral_mdl/tica_mdl.pkl"))
+    tica_data = load(os.path.join(base_dir,"dihedral_mdl/tica_features.pkl"))
+    df = pd.read_pickle(os.path.join(base_dir,"./dihedral_mdl/feature_descriptor.pkl"))
     with enter_temp_directory():
         cur_dir = os.path.abspath(os.path.curdir)
         TicaMetadSim(base_dir=cur_dir, tica_data=tica_data,tica_mdl=tica_mdl,
