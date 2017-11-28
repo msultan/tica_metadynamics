@@ -79,8 +79,8 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         output = plumed_network(vde_mdl,df, nrm, tica_mdl)
         arg=output[-1].split("LABEL=")[-1].split("PERIODIC")[0][:-1]
         output.append(render_metad_code(arg=arg,
-                                        sigma=height,
-                                        height=sigma,
+                                        sigma=sigma,
+                                        height=height,
                                         hills=hills_file,
                                         biasfactor=biasfactor,
                                         pace=pace,
