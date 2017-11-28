@@ -23,7 +23,7 @@ plumed_print_template = Template("PRINT ARG={{arg}} STRIDE={{stride}} FILE={{fil
 
 
 
-def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfactor=40,
+def render_metad_code(arg="tic_0", sigma=0.2, height=1.0, hills="HILLS",biasfactor=40,
                       temp=300,interval=None, grid=None,
                       label="metad",pace=1000, walker_n = None, walker_id=None,
                       **kwargs):
@@ -81,7 +81,7 @@ def render_metad_code(arg="tic0", sigma=0.2, height=1.0, hills="HILLS",biasfacto
     return ''.join(output)
 
 
-def render_metad_bias_print(arg="tic0,metad.bias",stride=1000,file="BIAS"):
+def render_metad_bias_print(arg="tic_0,metad.bias",stride=1000,file="BIAS"):
     """
     :param arg: tic name
     :param stride: stride for printing
