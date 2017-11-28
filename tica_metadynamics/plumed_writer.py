@@ -85,11 +85,12 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                                         biasfactor=biasfactor,
                                         pace=pace,
                                         temp=temp,
-                                        interval=interval_list,
-                                        grid = grid_list,
+                                        interval=interval_list[0],
+                                        grid = grid_list[0],
                                         label=label,
                                         walker_n=walker_n,
                                         walker_id=walker_id))
+        
         output.append(render_metad_bias_print(arg="tic_%d"%i,
                                              stride=stride,
                                              file=bias_file))
