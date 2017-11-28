@@ -6,13 +6,13 @@ bash $MINICONDA -b
 export PATH=$HOME/miniconda3/bin:$PATH
 conda config --add channels omnia
 conda config --add channels acellera
-conda config -add channels soumith
 #conda update conda
 conda info -a
 conda create --yes -n _test python=$TRAVIS_PYTHON_VERSION `cat requirements.txt | xargs`
 source activate _test
 conda install -yq plumed2=2.3.0
 conda install -yq openmm
-conda install -yq pytorch torchvision
+pip3 install http://download.pytorch.org/whl/cu75/torch-0.2.0.post3-cp35-cp35m-manylinux1_x86_64.whl
+pip3 install torchvision
 pip install git+https://github.com/msmbuilder/msmbuilder.git
 python setup.py install
