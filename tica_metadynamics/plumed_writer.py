@@ -90,8 +90,8 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                                         label=label,
                                         walker_n=walker_n,
                                         walker_id=walker_id))
-        
-        output.append(render_metad_bias_print(arg="tic_%d"%i,
+
+        output.append(render_metad_bias_print(arg=arg,
                                              stride=stride,
                                              file=bias_file))
         return_dict[0] = str(''.join(output))
