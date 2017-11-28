@@ -12,7 +12,6 @@ conda create --yes -n _test python=$TRAVIS_PYTHON_VERSION `cat requirements.txt 
 source activate _test
 conda install -yq plumed2=2.3.0
 conda install -yq openmm
-pip3 install http://download.pytorch.org/whl/cu75/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl
-pip3 install torchvision
+conda install -yq pytorch torchvision -c soumith
 pip install git+https://github.com/msmbuilder/msmbuilder.git
 python setup.py install
