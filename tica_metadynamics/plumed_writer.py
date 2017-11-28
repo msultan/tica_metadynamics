@@ -76,8 +76,26 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 
     vde_mdl = kwargs.pop("vde_mdl")
     if vde_mdl is not None:
-        return_dict[0] = plumed_network(vde_mdl,df, nrm, tica_mdl)
+        output = plumed_network(vde_mdl,df, nrm, tica_mdl)
+        arg=output[-1].split("LABEL=")[-1].split("PERIODIC")[0][:-1]
+        output.append(render_metad_code(arg=arg,
+                                        sigma=height,
+                                        height=sigma,
+                                        hills=hills_file,
+                                        biasfactor=biasfactor,
+                                        pace=pace,
+                                        temp=temp,
+                                        interval=interval_list,
+                                        grid = grid_list,
+                                        label=label,
+                                        walker_n=walker_n,
+                                        walker_id=walker_id))
+        output.append(render_metad_bias_print(arg="tic_%d"%i,
+                                             stride=stride,
+                                             file=bias_file))
+        return_dict[0] = str(''.join(output))
         return return_dict
+
     multiple_tics = kwargs.pop('multiple_tics')
 
     if type(multiple_tics) == int:
