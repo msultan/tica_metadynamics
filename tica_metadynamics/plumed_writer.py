@@ -30,7 +30,7 @@ def plumed_network(vde_mdl, df=None, nrm=None, tica_mdl=None):
         features = render_df(df, inds=inds, nrm=nrm, tica_mdl=tica_mdl)
         output.append(features)
         for i in range(n_tics):
-            output.append(render_tic(tica_mdl, i))
+            output.append(render_tic(tica_mdl, i, output_label_prefix="l0"))
     else:
         features = render_df(df, nrm=nrm)
         output.append(features)
