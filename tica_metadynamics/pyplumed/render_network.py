@@ -159,4 +159,4 @@ def render_network(model):
         else:
             raise ValueError("Something is wrong")
 
-    return output
+    return ''.join(output)
