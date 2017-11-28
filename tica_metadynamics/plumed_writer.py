@@ -35,7 +35,7 @@ def plumed_network(vde_mdl, df=None, nrm=None, tica_mdl=None):
         features = render_df(df, nrm=nrm)
         output.append(features)
     output.append(render_network(vde_mdl))
-    return str(''.join(output))
+    return output
 
 def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=None,
                             wall_list=None,nrm=None,
