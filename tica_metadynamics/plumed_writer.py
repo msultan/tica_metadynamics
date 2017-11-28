@@ -3,6 +3,7 @@ from jinja2 import Template
 from msmbuilder.utils import load
 import numpy as np
 from .pyplumed import *
+import warnings
 
 def get_interval(tica_data,lower,upper):
     if type(tica_data)==dict:
@@ -13,7 +14,28 @@ def get_interval(tica_data,lower,upper):
     return [i for i in zip(res[0],res[1])]
 
 
-
+def plumed_network(vde_mdl, df=None, nrm=None, tica_mdl=None):
+    assert df is not None
+    output = []
+    output.append("RESTART\n")
+    print("Running VDE dynamics")
+    import torch
+    vde_mdl = torch.load(vde_mdl, map_location=lambda storage, loc: storage)
+    if vde_mdl.input_size < len(df):
+        warnings.warn("VDE's input size is less than the dataframe. Assuming tica"
+                      "tICs are being fed into the model")
+        assert tica_mdl is not None
+        n_tics = vde_mdl.input_size
+        inds = np.unique(np.nonzero(tica_mdl.components_[:n_tics, :])[1])
+        features = render_df(df, inds=inds, nrm=nrm, tica_mdl=tica_mdl)
+        output.append(features)
+        for i in range(n_tics):
+            output.append(render_tic(tica_mdl, i))
+    else:
+        features = render_df(df, nrm=nrm)
+        output.append(features)
+    output.append(render_network(vde_mdl))
+    return output
 
 def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=None,
                             wall_list=None,nrm=None,
@@ -23,7 +45,6 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                             walker_n=None,walker_id = None,**kwargs):
     """
     Renders a tica plumed dictionary file that can be directly fed in openmm
-
     :param tica_mdl: project's ticamd
     :param df: data frame
     :param grid_list: list of min and max vals for grid
@@ -52,7 +73,13 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         grid_list = np.repeat(None,n_tics)
     if interval_list is None:
         interval_list = np.repeat(None, n_tics)
+
+    vde_mdl = kwargs.pop("vde_mdl")
+    if vde_mdl is not None:
+        return_dict[0] = plumed_network(vde_mdl,df, nrm, tica_mdl)
+        return return_dict
     multiple_tics = kwargs.pop('multiple_tics')
+
     if type(multiple_tics) == int:
         output = []
         output.append("RESTART\n")
@@ -140,6 +167,8 @@ def get_plumed_dict(metad_sim):
         metad_sim.walker_n = None
     if not hasattr(metad_sim, "multiple_tics"):
         metad_sim.multiple_tics = None
+    if not hasattr(metad_sim, "vde_mdl"):
+        metad_sim.vde_mdl = None
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
@@ -155,4 +184,5 @@ def get_plumed_dict(metad_sim):
                                    bias_file=metad_sim.bias_file, label=metad_sim.label,
                                    nrm = metad_sim.nrm, walker_id = metad_sim.walker_id,
                                    walker_n=metad_sim.walker_n,
-                                   multiple_tics=metad_sim.multiple_tics)
+                                   multiple_tics=metad_sim.multiple_tics,
+                                   vde_mdl = metad_sim.vde_mdl)

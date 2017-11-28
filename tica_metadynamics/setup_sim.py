@@ -30,7 +30,8 @@ class TicaMetadSim(object):
                             n_walkers = 1,
                             neutral_replica=False,
                             multiple_tics=False,
-                            plumed_script=None):
+                            plumed_script=None,
+                            vde_mdl = None):
         self.base_dir = os.path.abspath(base_dir)
         self.starting_coordinates_folder = starting_coordinates_folder
         self.n_tics = n_tics
@@ -89,6 +90,8 @@ class TicaMetadSim(object):
         self.render_scripts = render_scripts
         self.walker_n = n_walkers
         self.multiple_tics = multiple_tics
+        self.vde_mdl = vde_mdl
+
         if self.grid:
             if len(self.grid) < 2:
                 raise ValueError("grid must length at least 2 (like [0, 100]")
