@@ -216,7 +216,7 @@ def try_except_delete(folder_name, delete_existing=False):
             print("Folder already exists and cant delete")
             return
     return
-ee
+
 def parse_commandline():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f','--yaml_file', dest='f',
