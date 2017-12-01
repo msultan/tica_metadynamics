@@ -41,10 +41,7 @@ class TicaMetadSim(object):
         else:
             self.featurizer = featurizer
 
-        if type(tica_mdl)==str:
-            self.tica_mdl = load(tica_mdl)
-        else:
-            self.tica_mdl = tica_mdl
+        self.tica_mdl = tica_mdl
 
         if type(tica_data)==str:
             self.tica_data = load(tica_data)

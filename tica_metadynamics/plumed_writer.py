@@ -188,6 +188,8 @@ def get_plumed_dict(metad_sim):
         metad_sim.multiple_tics = None
     if not hasattr(metad_sim, "vde_mdl"):
         metad_sim.vde_mdl = None
+    if type(metad_sim.tica_mdl)==str:
+            metad_sim.tica_mdl = load(tica_mdl)
     return render_tica_plumed_file(tica_mdl=metad_sim.tica_mdl,
                                    df = metad_sim.data_frame,
                                    n_tics=metad_sim.n_tics,
