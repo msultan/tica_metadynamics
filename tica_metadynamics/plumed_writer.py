@@ -110,7 +110,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
         for i in range(multiple_tics):
             output.append(render_tic(tica_mdl,i))
 
-        tic_arg_list = ','.join(["tic%d"%i for i in range(multiple_tics)])
+        tic_arg_list = ','.join(["tic_%d"%i for i in range(multiple_tics)])
         grid_min = ','.join([str(grid_list[i][0]) for i in range(multiple_tics)])
         grid_max = ','.join([str(grid_list[i][1]) for i in range(multiple_tics)])
         current_grid_list = [grid_min, grid_max]
@@ -146,7 +146,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
 
         output.append(render_tic(tica_mdl, i))
         if wall_list is not None:
-            output.append(render_tic_wall(arg="tic%d"%i,
+            output.append(render_tic_wall(arg="tic_%d"%i,
                                           wall_limts=wall_list[i],
                                           **kwargs))
         if type(height) == list:
@@ -157,7 +157,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
             current_sigma = sigma[i]
         else:
             current_sigma = sigma
-        output.append(render_metad_code(arg="tic%d"%i,
+        output.append(render_metad_code(arg="tic_%d"%i,
                                         sigma=current_sigma,
                                         height=current_height,
                                         hills=hills_file,
@@ -169,7 +169,7 @@ def render_tica_plumed_file(tica_mdl, df, n_tics, grid_list=None,interval_list=N
                                         label=label,
                                         walker_n=walker_n,
                                         walker_id=walker_id))
-        output.append(render_metad_bias_print(arg="tic%d"%i,
+        output.append(render_metad_bias_print(arg="tic_%d"%i,
                                              stride=stride,
                                              file=bias_file))
         return_dict[i] = str(''.join(output))
