@@ -49,6 +49,9 @@ def render_metad_code(arg="tic_0", sigma=0.2, height=1.0, hills="HILLS",biasfact
           walker_dir = "../../data_tic0"
         elif arg.startswith("l"):
           walker_dir = "../../data_tic0"
+        elif arg.startswith("tic_"):
+          num = int(arg.split("_")[1])
+          walker_dir = "../../data_tic%d"%num
         else:
           walker_dir = "../../data_%s"%arg
     else:
